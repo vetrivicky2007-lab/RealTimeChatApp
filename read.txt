@@ -1,0 +1,5 @@
+cd D:\RealTimeChatApp\backend
+
+mvn compile
+
+mvn exec:java "-Dexec.mainClass=chat.ChatWebSocketServer"
