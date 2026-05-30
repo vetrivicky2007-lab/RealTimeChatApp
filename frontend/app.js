@@ -1,4 +1,4 @@
-const socket = new WebSocket("ws://localhost:8080");
+const socket = new WebSocket("wss://realtimechatapp-1-e4j1.onrender.com");
 
 const sendButton =
     document.getElementById("sendBtn");

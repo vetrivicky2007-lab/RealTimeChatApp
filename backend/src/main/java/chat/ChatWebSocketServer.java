@@ -104,11 +104,15 @@ public class ChatWebSocketServer extends WebSocketServer {
                 "WebSocket Server started on port 8080");
     }
 
-    public static void main(String[] args) {
+  public static void main(String[] args) {
 
-        ChatWebSocketServer server =
-                new ChatWebSocketServer(8080);
+    int port = Integer.parseInt(
+        System.getenv().getOrDefault("PORT", "8080")
+    );
 
-        server.start();
-    }
+    ChatWebSocketServer server =
+        new ChatWebSocketServer(port);
+
+    server.start();
+}
 }
