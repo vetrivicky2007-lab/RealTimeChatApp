@@ -287,57 +287,79 @@ body{
 
 /* MOBILE */
 
-@media(max-width:768px){
+@media (max-width: 768px) {
 
-    .main{
-        flex-direction:column;
+    body{
+        overflow:hidden;
     }
 
-    .users{
-        width:100%;
-        height:100px;
-
-        display:flex;
-        gap:10px;
-
-        overflow-x:auto;
-        overflow-y:hidden;
-    }
-
-    .users h2{
-        display:none;
-    }
-
-    .user{
-        min-width:130px;
-        margin-bottom:0;
+    .header{
+        height:70px;
+        padding:0 15px;
     }
 
     .header h1{
-        font-size:20px;
+        font-size:24px;
+    }
+
+    #logoutBtn{
+        padding:10px 14px;
+        font-size:14px;
+    }
+
+    .main{
+        flex-direction:row;
+    }
+
+    .users{
+        display:none;
+    }
+
+    .chat-area{
+        width:100%;
+        height:calc(100vh - 70px);
     }
 
     .messages{
         padding:15px;
+        flex:1;
+        overflow-y:auto;
     }
 
     .message-bubble,
     .other-bubble{
-        max-width:80vw;
-        font-size:14px;
+        max-width:85%;
+        font-size:15px;
+        padding:12px 14px;
     }
 
     .input-area{
+        padding:10px;
+        gap:8px;
+    }
+
+    .input-area input{
+        font-size:16px;
         padding:12px;
     }
 
     .input-area button{
-        padding:12px 18px;
+        width:80px;
+        padding:12px;
+        font-size:14px;
     }
 
     .login-card{
         width:92%;
         padding:25px;
     }
+
+    .login-card h1{
+        font-size:32px;
+    }
 }
+
+
+
+
 

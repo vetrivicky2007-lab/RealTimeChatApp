@@ -1,56 +1,55 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Real Time Chat</title>
-
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
     <div class="container">
 
-        <div class="header">
+        <header class="header">
 
-          <h1>Real Time Chat</h1>
+            <h1>Real Time Chat</h1>
 
-         <button id="logoutBtn">
-           Logout
-         </button>
+            <button id="logoutBtn">
+                Logout
+            </button>
 
-        </div>
+        </header>
 
         <div class="main">
 
-        <div class="users">
+            <aside class="users">
 
-          <h2>Online Users</h2>
+                <h2>Online Users</h2>
 
-          <div id="user-list"></div>
+                <div id="user-list"></div>
 
-        </div>
+            </aside>
 
-            <div class="chat-area">
+            <section class="chat-area">
 
-                <div class="messages">
-
-
-
-                </div>
+                <div class="messages"></div>
 
                 <div class="input-area">
+
                     <input
                         type="text"
                         placeholder="Type a message..."
-                    >
+                        autocomplete="off">
 
-                    <button id ="sendBtn">
+                    <button id="sendBtn">
                         Send
                     </button>
+
                 </div>
 
-            </div>
+            </section>
 
         </div>
 
@@ -59,4 +58,5 @@
     <script src="app.js"></script>
 
 </body>
+
 </html>
