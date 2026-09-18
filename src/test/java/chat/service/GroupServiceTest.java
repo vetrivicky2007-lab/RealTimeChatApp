@@ -41,15 +41,15 @@ class GroupServiceTest {
     }
 
     @Test
-    void testCreateGroupSuccess() {
-        CreateGroupRequest request = new CreateGroupRequest("CSE-A", "CSE A discussion group");
+    void testCreatePublicGroupSuccess() {
+        CreateGroupRequest request = new CreateGroupRequest("CSE-A", "CSE A discussion group", "PUBLIC");
         User creator = new User("vetrivel", "vetri@example.com", "hash");
         creator.setId("creatorId");
 
         when(groupRepository.existsByNameIgnoreCase("CSE-A")).thenReturn(false);
         when(userRepository.findById("creatorId")).thenReturn(Optional.of(creator));
 
-        Group savedGroup = new Group("CSE-A", "CSE A discussion group", "creatorId");
+        Group savedGroup = new Group("CSE-A", "CSE A discussion group", "creatorId", "PUBLIC", null);
         savedGroup.setId("groupId123");
         when(groupRepository.save(any(Group.class))).thenReturn(savedGroup);
 
@@ -59,14 +59,39 @@ class GroupServiceTest {
         assertEquals("CSE-A", result.getName());
         assertEquals("CSE A discussion group", result.getDescription());
         assertEquals("creatorId", result.getCreatedBy());
+        assertEquals("PUBLIC", result.getPrivacy());
         assertTrue(result.isAdmin());
         assertTrue(result.isMember());
         assertEquals(1, result.getMemberCount());
     }
 
     @Test
-    void testJoinGroup() {
-        Group group = new Group("Gaming", "Gaming chat", "adminUser");
+    void testCreatePrivateGroupSuccess() {
+        CreateGroupRequest request = new CreateGroupRequest("Project Alpha", "Confidential", "PRIVATE");
+        User creator = new User("vetrivel", "vetri@example.com", "hash");
+        creator.setId("creatorId");
+
+        when(groupRepository.existsByNameIgnoreCase("Project Alpha")).thenReturn(false);
+        when(userRepository.findById("creatorId")).thenReturn(Optional.of(creator));
+        when(groupRepository.existsByInviteCode(anyString())).thenReturn(false);
+
+        when(groupRepository.save(any(Group.class))).thenAnswer(i -> {
+            Group g = i.getArgument(0);
+            g.setId("alpha123");
+            return g;
+        });
+
+        GroupResponseDto result = groupService.createGroup(request, "creatorId");
+
+        assertNotNull(result);
+        assertEquals("PRIVATE", result.getPrivacy());
+        assertNotNull(result.getInviteCode());
+        assertTrue(result.isAdmin());
+    }
+
+    @Test
+    void testJoinPublicGroup() {
+        Group group = new Group("Gaming", "Gaming chat", "adminUser", "PUBLIC", null);
         group.setId("group1");
 
         when(groupRepository.findById("group1")).thenReturn(Optional.of(group));
@@ -80,8 +105,50 @@ class GroupServiceTest {
     }
 
     @Test
+    void testJoinPrivateGroupDirectlyFails() {
+        Group group = new Group("Secret", "Secret chat", "adminUser", "PRIVATE", "SEC-12345");
+        group.setId("secret1");
+
+        when(groupRepository.findById("secret1")).thenReturn(Optional.of(group));
+
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+                () -> groupService.joinGroup("secret1", "newUser"));
+
+        assertEquals(HttpStatus.FORBIDDEN, ex.getStatusCode());
+        assertTrue(ex.getReason().contains("private group"));
+    }
+
+    @Test
+    void testJoinPrivateGroupWithValidInviteCode() {
+        Group group = new Group("Secret", "Secret chat", "adminUser", "PRIVATE", "SEC-12345");
+        group.setId("secret1");
+
+        when(groupRepository.findById("secret1")).thenReturn(Optional.of(group));
+        when(groupRepository.save(any(Group.class))).thenAnswer(i -> i.getArgument(0));
+
+        GroupResponseDto result = groupService.joinPrivateGroup("secret1", "SEC-12345", "newUser");
+
+        assertTrue(result.isMember());
+        assertEquals(2, result.getMemberCount());
+        assertTrue(group.hasMember("newUser"));
+    }
+
+    @Test
+    void testJoinPrivateGroupWithInvalidInviteCodeFails() {
+        Group group = new Group("Secret", "Secret chat", "adminUser", "PRIVATE", "SEC-12345");
+        group.setId("secret1");
+
+        when(groupRepository.findById("secret1")).thenReturn(Optional.of(group));
+
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+                () -> groupService.joinPrivateGroup("secret1", "WRONG-CODE", "newUser"));
+
+        assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+    }
+
+    @Test
     void testLeaveGroup() {
-        Group group = new Group("Gaming", "Gaming chat", "adminUser");
+        Group group = new Group("Gaming", "Gaming chat", "adminUser", "PUBLIC", null);
         group.setId("group1");
         group.addMember("memberUser");
 
@@ -97,7 +164,7 @@ class GroupServiceTest {
 
     @Test
     void testNonAdminCannotDeleteGroup() {
-        Group group = new Group("Gaming", "Gaming chat", "adminUser");
+        Group group = new Group("Gaming", "Gaming chat", "adminUser", "PUBLIC", null);
         group.setId("group1");
 
         when(groupRepository.findById("group1")).thenReturn(Optional.of(group));
@@ -111,7 +178,7 @@ class GroupServiceTest {
 
     @Test
     void testAdminCanDeleteGroup() {
-        Group group = new Group("Gaming", "Gaming chat", "adminUser");
+        Group group = new Group("Gaming", "Gaming chat", "adminUser", "PUBLIC", null);
         group.setId("group1");
 
         when(groupRepository.findById("group1")).thenReturn(Optional.of(group));

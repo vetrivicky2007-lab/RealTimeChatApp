@@ -23,17 +23,28 @@
             </div>
         </header>
 
-        <!-- DASHBOARD VIEW: Available Groups -->
+        <!-- DASHBOARD VIEW: Group Navigation & Exploration -->
         <main id="dashboardView" class="view-panel">
             <div class="dashboard-toolbar">
                 <div class="toolbar-left">
-                    <h2>Available Groups</h2>
-                    <p class="section-desc">Join existing rooms or create your own community</p>
+                    <h2>Groups Hub</h2>
+                    <p class="section-desc">Connect with your communities, public channels, and private hives</p>
                 </div>
                 <div class="toolbar-right">
                     <input type="text" id="groupSearchInput" placeholder="🔍 Search groups..." class="search-input">
+                    <button id="openJoinPrivateModalBtn" class="secondary-btn">🔑 Join with Code</button>
                     <button id="openCreateModalBtn" class="primary-btn">+ Create Group</button>
                 </div>
+            </div>
+
+            <!-- Dashboard Tabs -->
+            <div class="dashboard-tabs">
+                <button id="tabMyGroups" class="dash-tab-btn active">
+                    My Groups <span id="myGroupsCountBadge" class="tab-badge">0</span>
+                </button>
+                <button id="tabDiscoverGroups" class="dash-tab-btn">
+                    Discover Groups <span id="discoverGroupsCountBadge" class="tab-badge">0</span>
+                </button>
             </div>
 
             <div id="groupsLoading" class="loading-state">
@@ -44,7 +55,7 @@
             <div id="groupsGrid" class="groups-grid" style="display: none;"></div>
 
             <div id="noGroupsMessage" class="empty-state" style="display: none;">
-                <p>No groups found. Be the first to create one!</p>
+                <p id="emptyStateText">No groups found. Be the first to create one!</p>
             </div>
         </main>
 
@@ -57,6 +68,11 @@
                         <div class="chat-title-row">
                             <h2 id="chatGroupName">Group Name</h2>
                             <span id="chatAdminBadge" class="badge admin-badge" style="display: none;">👑 Admin</span>
+                            <span id="chatPrivacyBadge" class="badge privacy-badge">🌐 Public</span>
+                            <div id="chatInviteCodeContainer" class="invite-code-pill" style="display: none;">
+                                <span>Code: <strong id="chatInviteCode">CODE</strong></span>
+                                <button type="button" id="copyInviteCodeBtn" class="copy-code-btn" title="Copy Invite Code">📋 Copy</button>
+                            </div>
                         </div>
                         <p class="chat-meta">
                             <span id="chatGroupDesc">Group description</span> •
@@ -76,7 +92,17 @@
                 <!-- Messages & Input column -->
                 <section class="chat-conversation">
                     <div id="messagesList" class="messages-container">
-                        <!-- Loaded history and live messages will appear here -->
+                        <!-- Loaded history and live messages appear here -->
+                    </div>
+
+                    <!-- Typing Indicator -->
+                    <div id="typingIndicator" class="typing-indicator" style="display: none;">
+                        <span class="typing-dots">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </span>
+                        <span id="typingText" class="typing-text">User is typing...</span>
                     </div>
 
                     <form id="chatForm" class="message-input-bar">
@@ -120,7 +146,7 @@
                     <input
                         type="text"
                         id="newGroupName"
-                        placeholder="e.g. CSE-A"
+                        placeholder="e.g. CSE-A or Project Titan"
                         maxlength="50"
                         required>
                 </div>
@@ -130,13 +156,66 @@
                     <textarea
                         id="newGroupDesc"
                         rows="3"
-                        placeholder="e.g. CSE A student discussion and announcements"
+                        placeholder="e.g. Official discussions, resources and team announcements"
                         maxlength="250"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Privacy Setting</label>
+                    <div class="privacy-options">
+                        <label class="privacy-radio-card">
+                            <input type="radio" name="newGroupPrivacy" value="PUBLIC" checked>
+                            <div class="radio-content">
+                                <span class="radio-title">🌐 Public</span>
+                                <span class="radio-desc">Anyone can discover and join this group directly.</span>
+                            </div>
+                        </label>
+                        <label class="privacy-radio-card">
+                            <input type="radio" name="newGroupPrivacy" value="PRIVATE">
+                            <div class="radio-content">
+                                <span class="radio-title">🔒 Private</span>
+                                <span class="radio-desc">Requires a unique invite code to join. Code is shared with members.</span>
+                            </div>
+                        </label>
+                    </div>
                 </div>
 
                 <div class="modal-actions">
                     <button type="button" id="cancelModalBtn" class="secondary-btn">Cancel</button>
                     <button type="submit" id="submitCreateGroupBtn" class="primary-btn">Create Group</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JOIN PRIVATE GROUP MODAL -->
+    <div id="joinPrivateModal" class="modal-overlay" style="display: none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Join Private Group</h3>
+                <button id="closeJoinPrivateModalBtn" class="modal-close">&times;</button>
+            </div>
+
+            <div id="joinPrivateError" class="auth-error" style="display: none;"></div>
+
+            <form id="joinPrivateForm">
+                <input type="hidden" id="targetPrivateGroupId" value="">
+
+                <div class="form-group">
+                    <label for="privateInviteCodeInput">Invite Code</label>
+                    <input
+                        type="text"
+                        id="privateInviteCodeInput"
+                        placeholder="e.g. CSEA-8B2K9"
+                        maxlength="30"
+                        autocomplete="off"
+                        required>
+                    <small class="form-help">Enter the secret invite code provided by the group admin.</small>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" id="cancelJoinPrivateModalBtn" class="secondary-btn">Cancel</button>
+                    <button type="submit" id="submitJoinPrivateBtn" class="primary-btn">Join Group</button>
                 </div>
             </form>
         </div>

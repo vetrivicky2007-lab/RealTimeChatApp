@@ -2,6 +2,7 @@ package chat.controller;
 
 import chat.dto.CreateGroupRequest;
 import chat.dto.GroupResponseDto;
+import chat.dto.JoinPrivateGroupRequest;
 import chat.dto.MessageDto;
 import chat.dto.UserSummaryDto;
 import chat.security.UserPrincipal;
@@ -60,6 +61,25 @@ public class GroupController {
             @AuthenticationPrincipal UserPrincipal userPrincipal) {
         ensureAuthenticated(userPrincipal);
         GroupResponseDto group = groupService.joinGroup(groupId, userPrincipal.getId());
+        return ResponseEntity.ok(group);
+    }
+
+    @PostMapping("/{groupId}/join-private")
+    public ResponseEntity<GroupResponseDto> joinPrivateGroup(
+            @PathVariable String groupId,
+            @Valid @RequestBody JoinPrivateGroupRequest request,
+            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        ensureAuthenticated(userPrincipal);
+        GroupResponseDto group = groupService.joinPrivateGroup(groupId, request.getInviteCode(), userPrincipal.getId());
+        return ResponseEntity.ok(group);
+    }
+
+    @PostMapping("/join-private")
+    public ResponseEntity<GroupResponseDto> joinPrivateByCode(
+            @Valid @RequestBody JoinPrivateGroupRequest request,
+            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        ensureAuthenticated(userPrincipal);
+        GroupResponseDto group = groupService.joinPrivateGroup(null, request.getInviteCode(), userPrincipal.getId());
         return ResponseEntity.ok(group);
     }
 

@@ -23,16 +23,22 @@ document.addEventListener("DOMContentLoaded", () => {
         currentUsernameEl.textContent = currentUser.username || "User";
     }
 
-    // UI elements
+    // UI elements - Dashboard
     const dashboardView = document.getElementById("dashboardView");
     const chatView = document.getElementById("chatView");
     const groupsGrid = document.getElementById("groupsGrid");
     const groupsLoading = document.getElementById("groupsLoading");
     const noGroupsMessage = document.getElementById("noGroupsMessage");
+    const emptyStateText = document.getElementById("emptyStateText");
     const groupSearchInput = document.getElementById("groupSearchInput");
     const openCreateModalBtn = document.getElementById("openCreateModalBtn");
+    const openJoinPrivateModalBtn = document.getElementById("openJoinPrivateModalBtn");
+    const tabMyGroups = document.getElementById("tabMyGroups");
+    const tabDiscoverGroups = document.getElementById("tabDiscoverGroups");
+    const myGroupsCountBadge = document.getElementById("myGroupsCountBadge");
+    const discoverGroupsCountBadge = document.getElementById("discoverGroupsCountBadge");
 
-    // Modal elements
+    // UI elements - Create Group Modal
     const createGroupModal = document.getElementById("createGroupModal");
     const closeModalBtn = document.getElementById("closeModalBtn");
     const cancelModalBtn = document.getElementById("cancelModalBtn");
@@ -40,17 +46,34 @@ document.addEventListener("DOMContentLoaded", () => {
     const createGroupError = document.getElementById("createGroupError");
     const newGroupNameInput = document.getElementById("newGroupName");
     const newGroupDescInput = document.getElementById("newGroupDesc");
+    const submitCreateGroupBtn = document.getElementById("submitCreateGroupBtn");
 
-    // Chat elements
+    // UI elements - Join Private Group Modal
+    const joinPrivateModal = document.getElementById("joinPrivateModal");
+    const closeJoinPrivateModalBtn = document.getElementById("closeJoinPrivateModalBtn");
+    const cancelJoinPrivateModalBtn = document.getElementById("cancelJoinPrivateModalBtn");
+    const joinPrivateForm = document.getElementById("joinPrivateForm");
+    const joinPrivateError = document.getElementById("joinPrivateError");
+    const targetPrivateGroupId = document.getElementById("targetPrivateGroupId");
+    const privateInviteCodeInput = document.getElementById("privateInviteCodeInput");
+    const submitJoinPrivateBtn = document.getElementById("submitJoinPrivateBtn");
+
+    // UI elements - Chat
     const backToGroupsBtn = document.getElementById("backToGroupsBtn");
     const chatGroupName = document.getElementById("chatGroupName");
     const chatGroupDesc = document.getElementById("chatGroupDesc");
     const chatGroupMembersCount = document.getElementById("chatGroupMembersCount");
     const chatAdminBadge = document.getElementById("chatAdminBadge");
+    const chatPrivacyBadge = document.getElementById("chatPrivacyBadge");
+    const chatInviteCodeContainer = document.getElementById("chatInviteCodeContainer");
+    const chatInviteCode = document.getElementById("chatInviteCode");
+    const copyInviteCodeBtn = document.getElementById("copyInviteCodeBtn");
     const onlineCountEl = document.getElementById("onlineCount");
     const leaveGroupBtn = document.getElementById("leaveGroupBtn");
     const deleteGroupBtn = document.getElementById("deleteGroupBtn");
     const messagesList = document.getElementById("messagesList");
+    const typingIndicator = document.getElementById("typingIndicator");
+    const typingText = document.getElementById("typingText");
     const chatForm = document.getElementById("chatForm");
     const messageInput = document.getElementById("messageInput");
     const groupMembersList = document.getElementById("groupMembersList");
@@ -58,9 +81,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // State
     let allGroups = [];
+    let currentTab = "my"; // "my" or "discover"
     let currentGroup = null;
     let activeOnlineUsers = new Set();
     let currentMembers = [];
+    let displayedMessageIds = new Set(); // Message deduplication cache
+    let activeTypers = new Set();
+    let isTyping = false;
+    let typingTimeout = null;
     let socket = null;
     let socketReconnectTimer = null;
 
@@ -121,7 +149,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
             socket.onclose = (event) => {
                 console.warn("WebSocket closed. Code:", event.code);
-                // Attempt reconnect if still on chat view
                 if (currentGroup && !socketReconnectTimer) {
                     socketReconnectTimer = setTimeout(() => {
                         socketReconnectTimer = null;
@@ -140,24 +167,85 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function handleWebSocketMessage(data) {
-        if (data.type === "NEW_MESSAGE") {
-            const msg = data.message;
-            if (currentGroup && msg.groupId === currentGroup.id) {
-                appendMessage(msg);
+        // 1. Structured MESSAGE frame (zero-latency broadcast from server)
+        if (data.type === "MESSAGE" || data.type === "NEW_MESSAGE") {
+            const msg = (data.type === "MESSAGE") ? {
+                id: data.messageId,
+                messageId: data.messageId,
+                groupId: data.groupId,
+                senderId: data.senderId,
+                senderUsername: data.senderUsername,
+                content: data.content,
+                timestamp: data.timestamp,
+                status: data.status
+            } : data.message;
+
+            if (currentGroup && msg && msg.groupId === currentGroup.id) {
+                const id = msg.id || msg.messageId;
+                // Deduplicate: avoid rendering if already rendered
+                if (id && displayedMessageIds.has(id)) {
+                    return;
+                }
+                if (id) {
+                    displayedMessageIds.add(id);
+                }
+                appendMessage(msg, true);
             }
-        } else if (data.type === "ONLINE_USERS") {
+        }
+        // 2. Real-time typing indicators
+        else if (data.type === "TYPING_UPDATE") {
+            if (currentGroup && data.groupId === currentGroup.id) {
+                const typingUser = data.senderUsername || data.username;
+                if (typingUser && typingUser !== currentUser.username) {
+                    if (data.isTyping) {
+                        activeTypers.add(typingUser);
+                    } else {
+                        activeTypers.delete(typingUser);
+                    }
+                    updateTypingUI();
+                }
+            }
+        }
+        // 3. Online members count and presence list
+        else if (data.type === "ONLINE_USERS") {
             if (currentGroup && data.groupId === currentGroup.id) {
                 onlineCountEl.textContent = data.onlineCount != null ? data.onlineCount : 0;
                 activeOnlineUsers = new Set(data.users || []);
                 renderGroupMembers();
             }
-        } else if (data.type === "ERROR") {
-            console.warn("WebSocket error received:", data.error);
+        }
+        // 4. Server error notifications
+        else if (data.type === "ERROR") {
+            console.warn("WebSocket error received from server:", data.error);
+        }
+    }
+
+    function updateTypingUI() {
+        if (!typingIndicator || !typingText) return;
+
+        if (activeTypers.size === 0) {
+            typingIndicator.style.display = "none";
+        } else if (activeTypers.size === 1) {
+            const user = Array.from(activeTypers)[0];
+            typingText.textContent = `${escapeHtml(user)} is typing...`;
+            typingIndicator.style.display = "flex";
+        } else {
+            typingText.textContent = "Several people are typing...";
+            typingIndicator.style.display = "flex";
+        }
+    }
+
+    function sendTypingEvent(typingState) {
+        if (socket && socket.readyState === WebSocket.OPEN && currentGroup) {
+            socket.send(JSON.stringify({
+                type: typingState ? "TYPING_START" : "TYPING_STOP",
+                groupId: currentGroup.id
+            }));
         }
     }
 
     // ============================================================
-    // DASHBOARD & GROUPS
+    // DASHBOARD, TABS & GROUP EXPLORATION
     // ============================================================
     async function loadGroups() {
         groupsLoading.style.display = "flex";
@@ -170,7 +258,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (res.ok) {
                 allGroups = await res.json();
-                renderGroups(allGroups);
+                updateTabBadges();
+                renderFilteredGroups();
             } else {
                 console.error("Failed to fetch groups:", res.status);
             }
@@ -181,10 +270,60 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    function updateTabBadges() {
+        const myCount = allGroups.filter(g => g.member).length;
+        const discoverCount = allGroups.filter(g => !g.member).length;
+        if (myGroupsCountBadge) myGroupsCountBadge.textContent = myCount;
+        if (discoverGroupsCountBadge) discoverGroupsCountBadge.textContent = discoverCount;
+    }
+
+    function switchTab(tab) {
+        currentTab = tab;
+        if (tab === "my") {
+            tabMyGroups.classList.add("active");
+            tabDiscoverGroups.classList.remove("active");
+        } else {
+            tabDiscoverGroups.classList.add("active");
+            tabMyGroups.classList.remove("active");
+        }
+        renderFilteredGroups();
+    }
+
+    if (tabMyGroups) {
+        tabMyGroups.addEventListener("click", () => switchTab("my"));
+    }
+    if (tabDiscoverGroups) {
+        tabDiscoverGroups.addEventListener("click", () => switchTab("discover"));
+    }
+
+    function renderFilteredGroups() {
+        const query = groupSearchInput ? groupSearchInput.value.trim().toLowerCase() : "";
+
+        // Filter by tab
+        let filtered = allGroups.filter(g => currentTab === "my" ? g.member : !g.member);
+
+        // Filter by search query
+        if (query) {
+            filtered = filtered.filter(g =>
+                g.name.toLowerCase().includes(query) ||
+                (g.description && g.description.toLowerCase().includes(query))
+            );
+        }
+
+        renderGroups(filtered);
+    }
+
     function renderGroups(groups) {
         groupsGrid.innerHTML = "";
 
         if (!groups || groups.length === 0) {
+            if (emptyStateText) {
+                if (currentTab === "my") {
+                    emptyStateText.textContent = "You haven't joined any groups yet. Switch to Discover Groups or create your own!";
+                } else {
+                    emptyStateText.textContent = "No groups available to discover right now. Create a new community!";
+                }
+            }
             noGroupsMessage.style.display = "block";
             groupsGrid.style.display = "none";
             return;
@@ -199,17 +338,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const isAdmin = group.admin;
             const isMember = group.member;
+            const isPrivate = group.privacy === "PRIVATE";
 
             card.innerHTML = `
                 <div class="group-card-header">
                     <h3 class="group-card-title">${escapeHtml(group.name)}</h3>
-                    ${isAdmin ? '<span class="badge admin-badge">👑 Admin</span>' : ''}
+                    <div style="display: flex; gap: 6px; align-items: center;">
+                        ${isAdmin ? '<span class="badge admin-badge">👑 Admin</span>' : ''}
+                        ${isPrivate
+                            ? '<span class="badge privacy-badge private">🔒 Private</span>'
+                            : '<span class="badge privacy-badge">🌐 Public</span>'
+                        }
+                    </div>
                 </div>
                 <p class="group-card-desc">${escapeHtml(group.description || "No description provided.")}</p>
                 <div class="group-card-footer">
                     <span class="member-count-pill">👥 ${group.memberCount} ${group.memberCount === 1 ? 'member' : 'members'}</span>
-                    <button class="card-action-btn ${isMember ? 'open-chat-btn' : 'join-group-btn'}">
-                        ${isMember ? 'Open Chat' : 'Join Group'}
+                    <button class="card-action-btn ${isMember ? 'open-chat-btn' : (isPrivate ? 'join-group-btn' : 'join-group-btn')}">
+                        ${isMember ? 'Open Chat' : (isPrivate ? '🔑 Enter Code' : 'Join Group')}
                     </button>
                 </div>
             `;
@@ -218,8 +364,10 @@ document.addEventListener("DOMContentLoaded", () => {
             actionBtn.addEventListener("click", () => {
                 if (isMember) {
                     openGroupChat(group);
+                } else if (isPrivate) {
+                    openJoinPrivateModal(group);
                 } else {
-                    joinGroup(group.id);
+                    joinPublicGroup(group.id);
                 }
             });
 
@@ -227,15 +375,9 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Search filter
-    groupSearchInput.addEventListener("input", () => {
-        const query = groupSearchInput.value.trim().toLowerCase();
-        const filtered = allGroups.filter(g =>
-            g.name.toLowerCase().includes(query) ||
-            (g.description && g.description.toLowerCase().includes(query))
-        );
-        renderGroups(filtered);
-    });
+    if (groupSearchInput) {
+        groupSearchInput.addEventListener("input", renderFilteredGroups);
+    }
 
     // ============================================================
     // CREATE GROUP
@@ -245,6 +387,8 @@ document.addEventListener("DOMContentLoaded", () => {
         createGroupError.textContent = "";
         newGroupNameInput.value = "";
         newGroupDescInput.value = "";
+        const defaultRadio = createGroupForm.querySelector('input[name="newGroupPrivacy"][value="PUBLIC"]');
+        if (defaultRadio) defaultRadio.checked = true;
         createGroupModal.style.display = "flex";
         newGroupNameInput.focus();
     });
@@ -268,6 +412,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const name = newGroupNameInput.value.trim();
         const description = newGroupDescInput.value.trim();
+        const selectedPrivacy = (createGroupForm.querySelector('input[name="newGroupPrivacy"]:checked') || {}).value || "PUBLIC";
 
         if (!name) {
             createGroupError.textContent = "Group name is required.";
@@ -275,14 +420,17 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        const submitBtn = document.getElementById("submitCreateGroupBtn");
-        submitBtn.disabled = true;
-        submitBtn.textContent = "Creating...";
+        submitCreateGroupBtn.disabled = true;
+        submitCreateGroupBtn.textContent = "Creating...";
 
         try {
             const res = await apiRequest("/api/groups", {
                 method: "POST",
-                body: JSON.stringify({ name, description })
+                body: JSON.stringify({
+                    name,
+                    description,
+                    privacy: selectedPrivacy
+                })
             });
 
             const data = await res.json();
@@ -300,15 +448,99 @@ document.addEventListener("DOMContentLoaded", () => {
             createGroupError.textContent = "Failed to connect to server.";
             createGroupError.style.display = "block";
         } finally {
-            submitBtn.disabled = false;
-            submitBtn.textContent = "Create Group";
+            submitCreateGroupBtn.disabled = false;
+            submitCreateGroupBtn.textContent = "Create Group";
         }
     });
 
     // ============================================================
-    // JOIN & LEAVE GROUP
+    // JOIN PRIVATE GROUP (INVITE CODE)
     // ============================================================
-    async function joinGroup(groupId) {
+    function openJoinPrivateModal(targetGroup = null) {
+        joinPrivateError.style.display = "none";
+        joinPrivateError.textContent = "";
+        privateInviteCodeInput.value = "";
+        targetPrivateGroupId.value = targetGroup ? targetGroup.id : "";
+
+        if (targetGroup) {
+            joinPrivateModal.querySelector("h3").textContent = `Join "${targetGroup.name}"`;
+        } else {
+            joinPrivateModal.querySelector("h3").textContent = "Join Private Group";
+        }
+
+        joinPrivateModal.style.display = "flex";
+        privateInviteCodeInput.focus();
+    }
+
+    function closeJoinPrivateModal() {
+        joinPrivateModal.style.display = "none";
+    }
+
+    if (openJoinPrivateModalBtn) {
+        openJoinPrivateModalBtn.addEventListener("click", () => openJoinPrivateModal(null));
+    }
+    if (closeJoinPrivateModalBtn) {
+        closeJoinPrivateModalBtn.addEventListener("click", closeJoinPrivateModal);
+    }
+    if (cancelJoinPrivateModalBtn) {
+        cancelJoinPrivateModalBtn.addEventListener("click", closeJoinPrivateModal);
+    }
+
+    joinPrivateModal.addEventListener("click", (e) => {
+        if (e.target === joinPrivateModal) {
+            closeJoinPrivateModal();
+        }
+    });
+
+    joinPrivateForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        joinPrivateError.style.display = "none";
+
+        const inviteCode = privateInviteCodeInput.value.trim().toUpperCase();
+        const groupId = targetPrivateGroupId.value;
+
+        if (!inviteCode) {
+            joinPrivateError.textContent = "Invite code is required.";
+            joinPrivateError.style.display = "block";
+            return;
+        }
+
+        submitJoinPrivateBtn.disabled = true;
+        submitJoinPrivateBtn.textContent = "Joining...";
+
+        try {
+            // If specific group target exists, call /{groupId}/join-private; otherwise call generic /join-private
+            const endpoint = groupId ? `/api/groups/${groupId}/join-private` : `/api/groups/join-private`;
+
+            const res = await apiRequest(endpoint, {
+                method: "POST",
+                body: JSON.stringify({ inviteCode })
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                closeJoinPrivateModal();
+                await loadGroups();
+                openGroupChat(data);
+            } else {
+                joinPrivateError.textContent = data.error || "Invalid invite code or unable to join.";
+                joinPrivateError.style.display = "block";
+            }
+        } catch (err) {
+            console.error("Join private group error:", err);
+            joinPrivateError.textContent = "Failed to connect to server.";
+            joinPrivateError.style.display = "block";
+        } finally {
+            submitJoinPrivateBtn.disabled = false;
+            submitJoinPrivateBtn.textContent = "Join Group";
+        }
+    });
+
+    // ============================================================
+    // JOIN PUBLIC GROUP & LEAVE GROUP
+    // ============================================================
+    async function joinPublicGroup(groupId) {
         try {
             const res = await apiRequest(`/api/groups/${groupId}/join`, {
                 method: "POST"
@@ -397,6 +629,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // ============================================================
     async function openGroupChat(group) {
         currentGroup = group;
+        displayedMessageIds.clear();
+        activeTypers.clear();
+        updateTypingUI();
 
         dashboardView.style.display = "none";
         chatView.style.display = "flex";
@@ -405,6 +640,7 @@ document.addEventListener("DOMContentLoaded", () => {
         chatGroupDesc.textContent = group.description || "No description";
         chatGroupMembersCount.textContent = `${group.memberCount} ${group.memberCount === 1 ? 'member' : 'members'}`;
 
+        // Admin badge & delete controls
         if (group.admin) {
             chatAdminBadge.style.display = "inline-block";
             deleteGroupBtn.style.display = "inline-block";
@@ -413,9 +649,25 @@ document.addEventListener("DOMContentLoaded", () => {
             deleteGroupBtn.style.display = "none";
         }
 
-        messagesList.innerHTML = `
-            <div class="chat-loading">Loading chat history...</div>
-        `;
+        // Privacy badge
+        const isPrivate = group.privacy === "PRIVATE";
+        if (isPrivate) {
+            chatPrivacyBadge.textContent = "🔒 Private";
+            chatPrivacyBadge.className = "badge privacy-badge private";
+        } else {
+            chatPrivacyBadge.textContent = "🌐 Public";
+            chatPrivacyBadge.className = "badge privacy-badge";
+        }
+
+        // Private group invite code display & copy button
+        if (isPrivate && group.inviteCode) {
+            chatInviteCodeContainer.style.display = "inline-flex";
+            chatInviteCode.textContent = group.inviteCode;
+        } else {
+            chatInviteCodeContainer.style.display = "none";
+        }
+
+        messagesList.innerHTML = `<div class="chat-loading">Loading chat history...</div>`;
 
         // Connect WebSocket and send JOIN_GROUP
         initWebSocket();
@@ -431,9 +683,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Load group members list
         loadGroupMembers(group.id);
+
+        messageInput.focus();
     }
 
     function closeGroupChat() {
+        if (typingTimeout) clearTimeout(typingTimeout);
+        if (isTyping) {
+            isTyping = false;
+            sendTypingEvent(false);
+        }
+
         if (socket && socket.readyState === WebSocket.OPEN && currentGroup) {
             socket.send(JSON.stringify({
                 type: "LEAVE_GROUP",
@@ -442,8 +702,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         currentGroup = null;
+        displayedMessageIds.clear();
+        activeTypers.clear();
         activeOnlineUsers.clear();
         currentMembers = [];
+        updateTypingUI();
 
         chatView.style.display = "none";
         dashboardView.style.display = "block";
@@ -453,6 +716,24 @@ document.addEventListener("DOMContentLoaded", () => {
         closeGroupChat();
         loadGroups();
     });
+
+    // Copy Invite Code Button
+    if (copyInviteCodeBtn) {
+        copyInviteCodeBtn.addEventListener("click", () => {
+            if (currentGroup && currentGroup.inviteCode) {
+                navigator.clipboard.writeText(currentGroup.inviteCode).then(() => {
+                    const originalText = copyInviteCodeBtn.textContent;
+                    copyInviteCodeBtn.textContent = "✓ Copied!";
+                    setTimeout(() => {
+                        copyInviteCodeBtn.textContent = originalText;
+                    }, 2000);
+                }).catch(err => {
+                    console.error("Clipboard copy failed:", err);
+                    prompt("Copy invite code:", currentGroup.inviteCode);
+                });
+            }
+        });
+    }
 
     // ============================================================
     // MESSAGE HISTORY & RENDERING
@@ -465,6 +746,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (res.ok) {
                 const messages = await res.json();
                 messagesList.innerHTML = "";
+                displayedMessageIds.clear();
 
                 if (messages.length === 0) {
                     messagesList.innerHTML = `
@@ -473,7 +755,11 @@ document.addEventListener("DOMContentLoaded", () => {
                         </div>
                     `;
                 } else {
-                    messages.forEach(msg => appendMessage(msg, false));
+                    messages.forEach(msg => {
+                        const id = msg.id || msg.messageId;
+                        if (id) displayedMessageIds.add(id);
+                        appendMessage(msg, false);
+                    });
                     scrollMessagesToBottom();
                 }
             } else {
@@ -529,6 +815,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <span class="sender-name">${escapeHtml(msg.senderUsername || "User")}</span>
                 <span class="message-sep">•</span>
                 <span class="message-time">${timeStr}</span>
+                ${mine ? '<span class="message-status">✓</span>' : ''}
             </div>
             <div class="${mine ? 'message-bubble' : 'other-bubble'}">
                 ${escapeHtml(msg.content)}
@@ -559,7 +846,34 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // ============================================================
-    // SEND MESSAGE
+    // REAL-TIME TYPING DETECTION & EVENT DISPATCH
+    // ============================================================
+    messageInput.addEventListener("input", () => {
+        if (!currentGroup) return;
+
+        const val = messageInput.value.trim();
+        if (val.length > 0) {
+            if (!isTyping) {
+                isTyping = true;
+                sendTypingEvent(true);
+            }
+
+            if (typingTimeout) clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => {
+                isTyping = false;
+                sendTypingEvent(false);
+            }, 2000);
+        } else {
+            if (isTyping) {
+                isTyping = false;
+                sendTypingEvent(false);
+            }
+            if (typingTimeout) clearTimeout(typingTimeout);
+        }
+    });
+
+    // ============================================================
+    // SEND MESSAGE (ZERO DELAY IN-MEMORY BROADCAST)
     // ============================================================
     chatForm.addEventListener("submit", (e) => {
         e.preventDefault();
@@ -569,7 +883,14 @@ document.addEventListener("DOMContentLoaded", () => {
         const content = messageInput.value.trim();
         if (!content) return;
 
-        // Send through WebSocket
+        // Reset typing indicator immediately on send
+        if (typingTimeout) clearTimeout(typingTimeout);
+        if (isTyping) {
+            isTyping = false;
+            sendTypingEvent(false);
+        }
+
+        // Send through WebSocket to group room
         if (socket && socket.readyState === WebSocket.OPEN) {
             socket.send(JSON.stringify({
                 type: "SEND_MESSAGE",

@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -22,6 +23,7 @@ public class GroupService {
     private final GroupRepository groupRepository;
     private final UserRepository userRepository;
     private final MessageRepository messageRepository;
+    private final SecureRandom secureRandom = new SecureRandom();
 
     public GroupService(
             GroupRepository groupRepository,
@@ -41,7 +43,21 @@ public class GroupService {
         User creator = userRepository.findById(creatorId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        Group group = new Group(name, request.getDescription() != null ? request.getDescription().trim() : "", creatorId);
+        String privacy = (request.getPrivacy() != null && request.getPrivacy().equalsIgnoreCase("PRIVATE"))
+                ? "PRIVATE" : "PUBLIC";
+
+        String inviteCode = null;
+        if ("PRIVATE".equals(privacy)) {
+            inviteCode = generateUniqueInviteCode(name);
+        }
+
+        Group group = new Group(
+                name,
+                request.getDescription() != null ? request.getDescription().trim() : "",
+                creatorId,
+                privacy,
+                inviteCode
+        );
         group.setCreatedAt(Instant.now());
         group.setUpdatedAt(Instant.now());
 
@@ -68,6 +84,42 @@ public class GroupService {
 
     public GroupResponseDto joinGroup(String groupId, String userId) {
         Group group = findGroupOrThrow(groupId);
+
+        if (group.isPrivate()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "This is a private group. Please use an invite code to join.");
+        }
+
+        if (!group.hasMember(userId)) {
+            group.addMember(userId);
+            group = groupRepository.save(group);
+        }
+
+        String creatorUsername = userRepository.findById(group.getCreatedBy())
+                .map(User::getUsername)
+                .orElse("Unknown");
+        return toDto(group, userId, creatorUsername);
+    }
+
+    public GroupResponseDto joinPrivateGroup(String groupId, String inviteCode, String userId) {
+        Group group;
+
+        if (groupId != null && !groupId.trim().isEmpty()) {
+            group = findGroupOrThrow(groupId);
+        } else if (inviteCode != null && !inviteCode.trim().isEmpty()) {
+            group = groupRepository.findByInviteCode(inviteCode.trim().toUpperCase())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid invite code. No group found."));
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invite code is required.");
+        }
+
+        if (!group.isPrivate()) {
+            // If group is actually public, allow joining directly
+            return joinGroup(group.getId(), userId);
+        }
+
+        if (inviteCode == null || !inviteCode.trim().equalsIgnoreCase(group.getInviteCode())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid invite code for this group.");
+        }
 
         if (!group.hasMember(userId)) {
             group.addMember(userId);
@@ -159,6 +211,29 @@ public class GroupService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found"));
     }
 
+    private String generateUniqueInviteCode(String groupName) {
+        String prefix = groupName.replaceAll("[^a-zA-Z0-9]", "").toUpperCase();
+        if (prefix.length() > 4) {
+            prefix = prefix.substring(0, 4);
+        } else if (prefix.isEmpty()) {
+            prefix = "UNI";
+        }
+
+        String code;
+        int attempts = 0;
+        do {
+            int randomPart = 10000 + secureRandom.nextInt(90000);
+            code = prefix + "-" + randomPart;
+            attempts++;
+            if (attempts > 50) {
+                code = prefix + "-" + UUID.randomUUID().toString().substring(0, 5).toUpperCase();
+                break;
+            }
+        } while (groupRepository.existsByInviteCode(code));
+
+        return code;
+    }
+
     private Map<String, String> buildUsernameCache(List<Group> groups) {
         Set<String> creatorIds = groups.stream()
                 .map(Group::getCreatedBy)
@@ -173,14 +248,26 @@ public class GroupService {
         dto.setId(group.getId());
         dto.setName(group.getName());
         dto.setDescription(group.getDescription());
+        dto.setPrivacy(group.getPrivacy() != null ? group.getPrivacy() : "PUBLIC");
         dto.setCreatedBy(group.getCreatedBy());
         dto.setCreatorUsername(creatorUsername != null ? creatorUsername : "Unknown");
         dto.setCreatedAt(group.getCreatedAt());
         dto.setUpdatedAt(group.getUpdatedAt());
         dto.setMemberCount(group.getMemberCount());
         dto.setMembers(group.getMembers());
-        dto.setMember(currentUserId != null && group.hasMember(currentUserId));
-        dto.setAdmin(currentUserId != null && group.isAdmin(currentUserId));
+
+        boolean isMember = currentUserId != null && group.hasMember(currentUserId);
+        boolean isAdmin = currentUserId != null && group.isAdmin(currentUserId);
+        dto.setMember(isMember);
+        dto.setAdmin(isAdmin);
+
+        // Security: only expose invite code to members or administrator of private groups
+        if (group.isPrivate() && (isMember || isAdmin)) {
+            dto.setInviteCode(group.getInviteCode());
+        } else {
+            dto.setInviteCode(null);
+        }
+
         return dto;
     }
 }

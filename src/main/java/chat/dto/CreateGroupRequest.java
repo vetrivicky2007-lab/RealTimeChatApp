@@ -12,12 +12,21 @@ public class CreateGroupRequest {
     @Size(max = 250, message = "Description cannot exceed 250 characters")
     private String description;
 
+    private String privacy = "PUBLIC"; // "PUBLIC" or "PRIVATE"
+
     public CreateGroupRequest() {
     }
 
     public CreateGroupRequest(String name, String description) {
         this.name = name;
         this.description = description;
+        this.privacy = "PUBLIC";
+    }
+
+    public CreateGroupRequest(String name, String description, String privacy) {
+        this.name = name;
+        this.description = description;
+        this.privacy = (privacy != null && privacy.equalsIgnoreCase("PRIVATE")) ? "PRIVATE" : "PUBLIC";
     }
 
     public String getName() {
@@ -34,5 +43,13 @@ public class CreateGroupRequest {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getPrivacy() {
+        return privacy;
+    }
+
+    public void setPrivacy(String privacy) {
+        this.privacy = (privacy != null && privacy.equalsIgnoreCase("PRIVATE")) ? "PRIVATE" : "PUBLIC";
     }
 }

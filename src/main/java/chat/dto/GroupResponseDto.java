@@ -8,6 +8,8 @@ public class GroupResponseDto {
     private String id;
     private String name;
     private String description;
+    private String privacy = "PUBLIC"; // "PUBLIC" or "PRIVATE"
+    private String inviteCode;
     private String createdBy;
     private String creatorUsername;
     private Instant createdAt;
@@ -42,6 +44,22 @@ public class GroupResponseDto {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getPrivacy() {
+        return privacy;
+    }
+
+    public void setPrivacy(String privacy) {
+        this.privacy = privacy;
+    }
+
+    public String getInviteCode() {
+        return inviteCode;
+    }
+
+    public void setInviteCode(String inviteCode) {
+        this.inviteCode = inviteCode;
     }
 
     public String getCreatedBy() {

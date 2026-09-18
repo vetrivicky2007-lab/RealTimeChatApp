@@ -1,11 +1,11 @@
 package chat.websocket;
 
-import chat.dto.MessageDto;
 import chat.dto.WsAction;
 import chat.security.JwtTokenProvider;
 import chat.service.GroupService;
 import chat.service.MessageService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -16,7 +16,9 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
 import java.net.URI;
+import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -28,7 +30,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     private final JwtTokenProvider tokenProvider;
     private final GroupService groupService;
     private final MessageService messageService;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
 
     // Map: SessionId -> UserSessionInfo
     private final Map<String, UserSessionInfo> sessionUsers = new ConcurrentHashMap<>();
@@ -43,6 +45,9 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         this.tokenProvider = tokenProvider;
         this.groupService = groupService;
         this.messageService = messageService;
+
+        this.objectMapper = new ObjectMapper();
+        this.objectMapper.registerModule(new JavaTimeModule());
     }
 
     @Override
@@ -76,6 +81,8 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
                 case "JOIN_GROUP" -> handleJoinGroup(session, action);
                 case "LEAVE_GROUP" -> handleLeaveGroup(session, action);
                 case "SEND_MESSAGE" -> handleSendMessage(session, action);
+                case "TYPING_START" -> handleTyping(session, action, true);
+                case "TYPING_STOP" -> handleTyping(session, action, false);
                 default -> sendToSession(session, WsAction.error("Unknown action: " + action.getType()));
             }
 
@@ -163,12 +170,78 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             return;
         }
 
-        // 1. Save to MongoDB
-        MessageDto savedMessage = messageService.saveMessage(groupId, user.userId, user.username, content, "TEXT");
+        // 1. Assign ID and timestamp immediately in-memory
+        String messageId = UUID.randomUUID().toString();
+        Instant now = Instant.now();
+        String trimmedContent = content.trim();
 
-        // 2. Broadcast ONLY to active sessions in this group room
-        WsAction broadcastAction = WsAction.newMessage(savedMessage);
+        // 2. Build structured message frame matching requirement 10
+        WsAction broadcastAction = WsAction.message(
+                messageId,
+                groupId,
+                user.userId,
+                user.username,
+                trimmedContent,
+                now,
+                "SENT"
+        );
+
+        // 3. BROADCAST IMMEDIATELY to ALL active sessions in group room (including sender!)
+        // Zero delay: Delivery occurs in-memory across active WebSockets
         broadcastToGroup(groupId, broadcastAction);
+
+        // 4. PERSIST ASYNCHRONOUSLY to MongoDB Atlas in the background
+        // Slow cloud database latency never blocks real-time delivery!
+        final String finalGroupId = groupId;
+        CompletableFuture.runAsync(() -> {
+            try {
+                messageService.savePreGeneratedMessage(
+                        messageId,
+                        finalGroupId,
+                        user.userId,
+                        user.username,
+                        trimmedContent,
+                        now,
+                        "TEXT"
+                );
+            } catch (Exception e) {
+                logger.error("Async MongoDB persistence failed for message {}: {}", messageId, e.getMessage());
+            }
+        });
+    }
+
+    private void handleTyping(WebSocketSession session, WsAction action, boolean isTyping) {
+        UserSessionInfo user = sessionUsers.get(session.getId());
+        if (user == null) return;
+
+        String groupId = action.getGroupId();
+        if (groupId == null) groupId = user.currentGroupId;
+        if (groupId == null) return;
+
+        WsAction typingAction = WsAction.typingUpdate(groupId, user.username, isTyping);
+
+        // Broadcast to group members excluding sender
+        Set<WebSocketSession> sessions = groupRooms.get(groupId);
+        if (sessions == null || sessions.isEmpty()) return;
+
+        try {
+            String json = objectMapper.writeValueAsString(typingAction);
+            TextMessage textMessage = new TextMessage(json);
+
+            for (WebSocketSession s : sessions) {
+                if (s.isOpen() && !s.getId().equals(session.getId())) {
+                    synchronized (s) {
+                        try {
+                            s.sendMessage(textMessage);
+                        } catch (IOException e) {
+                            logger.warn("Failed sending typing status to session {}: {}", s.getId(), e.getMessage());
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Error broadcasting typing event: {}", e.getMessage());
+        }
     }
 
     private void leaveCurrentGroup(WebSocketSession session, UserSessionInfo user) {

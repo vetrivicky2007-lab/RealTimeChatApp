@@ -41,6 +41,35 @@ public class MessageService {
                 messageType != null ? messageType : "TEXT"
         );
         message.setTimestamp(Instant.now());
+        message.setStatus("SENT");
+
+        Message saved = messageRepository.save(message);
+        return toDto(saved);
+    }
+
+    public MessageDto savePreGeneratedMessage(
+            String messageId,
+            String groupId,
+            String senderId,
+            String senderUsername,
+            String content,
+            Instant timestamp,
+            String messageType) {
+
+        if (content == null || content.trim().isEmpty()) {
+            return null;
+        }
+
+        Message message = new Message(
+                messageId,
+                groupId,
+                senderId,
+                senderUsername,
+                content.trim(),
+                timestamp != null ? timestamp : Instant.now(),
+                messageType != null ? messageType : "TEXT",
+                "SENT"
+        );
 
         Message saved = messageRepository.save(message);
         return toDto(saved);
@@ -67,7 +96,8 @@ public class MessageService {
                 message.getSenderUsername(),
                 message.getContent(),
                 message.getTimestamp(),
-                message.getMessageType()
+                message.getMessageType(),
+                message.getStatus() != null ? message.getStatus() : "SENT"
         );
     }
 }

@@ -11,6 +11,8 @@ public class MessageDto {
     private String content;
     private Instant timestamp;
     private String messageType;
+    private String status = "SENT";
+    private String conversationType = "GROUP";
 
     public MessageDto() {
     }
@@ -23,6 +25,20 @@ public class MessageDto {
         this.content = content;
         this.timestamp = timestamp;
         this.messageType = messageType;
+        this.status = "SENT";
+        this.conversationType = "GROUP";
+    }
+
+    public MessageDto(String id, String groupId, String senderId, String senderUsername, String content, Instant timestamp, String messageType, String status) {
+        this.id = id;
+        this.groupId = groupId;
+        this.senderId = senderId;
+        this.senderUsername = senderUsername;
+        this.content = content;
+        this.timestamp = timestamp;
+        this.messageType = messageType;
+        this.status = status;
+        this.conversationType = "GROUP";
     }
 
     public String getId() {
@@ -79,5 +95,21 @@ public class MessageDto {
 
     public void setMessageType(String messageType) {
         this.messageType = messageType;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getConversationType() {
+        return conversationType;
+    }
+
+    public void setConversationType(String conversationType) {
+        this.conversationType = conversationType;
     }
 }
