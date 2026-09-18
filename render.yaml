@@ -2,7 +2,6 @@ services:
   - type: web
     name: unihive
     runtime: java
-    rootDir: backend
     buildCommand: mvn clean package -DskipTests
     startCommand: java -Dserver.port=$PORT -jar target/unihive-1.0.0.jar
     envVars:

@@ -4,11 +4,11 @@
 FROM maven:3.9.9-eclipse-temurin-21 AS build
 WORKDIR /app
 
-# Copy pom and source from backend directory
-COPY backend/pom.xml .
-COPY backend/src ./src
+# Copy pom and source from root
+COPY pom.xml .
+COPY src ./src
 
-# Build production executable jar containing static frontend
+# Build production executable jar containing embedded static frontend
 RUN mvn clean package -DskipTests
 
 # Runtime image
