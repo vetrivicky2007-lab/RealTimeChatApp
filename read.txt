@@ -1,5 +1,40 @@
-cd D:\RealTimeChatApp\backend
+=============================================================
+UniHive - Cloud-Ready Group Chat Application
+=============================================================
 
-mvn compile
+1. CONFIGURATION:
+-----------------
+Copy the sample environment template:
+    copy .env.example .env
 
-mvn exec:java "-Dexec.mainClass=chat.ChatWebSocketServer"
+Set your MongoDB Atlas connection URI and other variables in .env:
+    SPRING_DATA_MONGODB_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/unihive?retryWrites=true&w=majority
+    JWT_SECRET=your_super_secret_jwt_key_at_least_32_characters_long_12345
+    FRONTEND_URL=http://localhost:3000,http://127.0.0.1:5500,http://localhost:8080
+    PORT=8080
+
+2. RUNNING THE BACKEND (Spring Boot):
+------------------------------------
+From the backend directory:
+    cd backend
+    mvn clean package -DskipTests
+    mvn spring-boot:run
+
+Alternatively, run the packaged executable jar:
+    java -jar target/unihive-1.0.0.jar
+
+3. RUNNING THE FRONTEND:
+------------------------
+Open `frontend/login.html` or `frontend/index.html` via Live Server or a simple HTTP server:
+    npx serve frontend -p 3000
+    or open in browser via VS Code / IDE Live Server.
+
+4. DEPLOYMENT ON RENDER:
+------------------------
+- Root Directory: backend
+- Build Command: mvn clean package -DskipTests
+- Start Command: java -Dserver.port=$PORT -jar target/unihive-1.0.0.jar
+- Set Environment Variables on Render dashboard:
+    SPRING_DATA_MONGODB_URI = <Your MongoDB Atlas URI>
+    JWT_SECRET              = <Your Secure JWT Secret>
+    FRONTEND_URL            = <Your Deployed Frontend URL>
