@@ -1,40 +1,48 @@
 =============================================================
-UniHive - Cloud-Ready Group Chat Application
+UniHive - Single-Service Real-Time Group Chat Application
 =============================================================
 
-1. CONFIGURATION:
------------------
+1. OVERVIEW:
+------------
+UniHive is configured as a UNIFIED SINGLE WEB SERVICE.
+The Spring Boot backend serves the frontend web UI, REST APIs,
+and WebSocket endpoints from a single domain and single port!
+
+2. LOCAL CONFIGURATION & RUN:
+-----------------------------
 Copy the sample environment template:
     copy .env.example .env
 
-Set your MongoDB Atlas connection URI and other variables in .env:
-    SPRING_DATA_MONGODB_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/unihive?retryWrites=true&w=majority
+Set your MongoDB Atlas connection URI in .env:
+    MONGODB_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/unihive?retryWrites=true&w=majority
     JWT_SECRET=your_super_secret_jwt_key_at_least_32_characters_long_12345
-    FRONTEND_URL=http://localhost:3000,http://127.0.0.1:5500,http://localhost:8080
     PORT=8080
 
-2. RUNNING THE BACKEND (Spring Boot):
-------------------------------------
-From the backend directory:
+Run the unified application from the backend directory:
     cd backend
     mvn clean package -DskipTests
-    mvn spring-boot:run
-
-Alternatively, run the packaged executable jar:
     java -jar target/unihive-1.0.0.jar
 
-3. RUNNING THE FRONTEND:
-------------------------
-Open `frontend/login.html` or `frontend/index.html` via Live Server or a simple HTTP server:
-    npx serve frontend -p 3000
-    or open in browser via VS Code / IDE Live Server.
+Then open your browser at:
+    http://localhost:8080/
+The web interface will load directly, and APIs/WebSockets will connect on the same domain and port!
 
-4. DEPLOYMENT ON RENDER:
-------------------------
-- Root Directory: backend
-- Build Command: mvn clean package -DskipTests
-- Start Command: java -Dserver.port=$PORT -jar target/unihive-1.0.0.jar
-- Set Environment Variables on Render dashboard:
-    SPRING_DATA_MONGODB_URI = <Your MongoDB Atlas URI>
-    JWT_SECRET              = <Your Secure JWT Secret>
-    FRONTEND_URL            = <Your Deployed Frontend URL>
+3. DEPLOYMENT ON RENDER (AS ONE WEB SERVICE):
+--------------------------------------------
+On https://dashboard.render.com:
+- Create New -> Web Service
+- Connect your GitHub repository: RealTimeChatApp
+- Configuration Settings:
+    * Environment: Java (or Docker)
+    * Root Directory: backend
+    * Build Command: mvn clean package -DskipTests
+    * Start Command: java -Dserver.port=$PORT -jar target/unihive-1.0.0.jar
+- Add Environment Variables in Render:
+    * MONGODB_URI: (Your MongoDB Atlas connection string)
+    * JWT_SECRET: (A random 32+ character key)
+    * FRONTEND_URL: *
+
+Once deployed, your full chat application (UI + Backend + WebSocket)
+is accessible directly from:
+    https://<your-service-name>.onrender.com
+No separate frontend deployment needed!

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniHive - Group Real-Time Chat</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="app-container">
+
+        <!-- Global Header -->
+        <header class="app-header">
+            <div class="header-brand">
+                <span class="header-logo">🐝</span>
+                <span class="header-title">UniHive</span>
+            </div>
+
+            <div class="header-user-info">
+                <span class="user-greeting">Logged in as: <strong id="currentUsername">User</strong></span>
+                <button id="logoutBtn" class="danger-btn">Logout</button>
+            </div>
+        </header>
+
+        <!-- DASHBOARD VIEW: Available Groups -->
+        <main id="dashboardView" class="view-panel">
+            <div class="dashboard-toolbar">
+                <div class="toolbar-left">
+                    <h2>Available Groups</h2>
+                    <p class="section-desc">Join existing rooms or create your own community</p>
+                </div>
+                <div class="toolbar-right">
+                    <input type="text" id="groupSearchInput" placeholder="🔍 Search groups..." class="search-input">
+                    <button id="openCreateModalBtn" class="primary-btn">+ Create Group</button>
+                </div>
+            </div>
+
+            <div id="groupsLoading" class="loading-state">
+                <div class="spinner"></div>
+                <p>Loading groups from MongoDB...</p>
+            </div>
+
+            <div id="groupsGrid" class="groups-grid" style="display: none;"></div>
+
+            <div id="noGroupsMessage" class="empty-state" style="display: none;">
+                <p>No groups found. Be the first to create one!</p>
+            </div>
+        </main>
+
+        <!-- GROUP CHAT VIEW: Real-Time Room -->
+        <main id="chatView" class="view-panel" style="display: none;">
+            <div class="chat-header">
+                <div class="chat-header-left">
+                    <button id="backToGroupsBtn" class="secondary-btn">⬅ Back to Groups</button>
+                    <div class="chat-title-info">
+                        <div class="chat-title-row">
+                            <h2 id="chatGroupName">Group Name</h2>
+                            <span id="chatAdminBadge" class="badge admin-badge" style="display: none;">👑 Admin</span>
+                        </div>
+                        <p class="chat-meta">
+                            <span id="chatGroupDesc">Group description</span> •
+                            <span id="chatGroupMembersCount">0 members</span> •
+                            <span class="online-indicator">🟢 <span id="onlineCount">1</span> online</span>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="chat-header-actions">
+                    <button id="leaveGroupBtn" class="warning-btn">Leave Group</button>
+                    <button id="deleteGroupBtn" class="danger-btn" style="display: none;">Delete Group</button>
+                </div>
+            </div>
+
+            <div class="chat-body">
+                <!-- Messages & Input column -->
+                <section class="chat-conversation">
+                    <div id="messagesList" class="messages-container">
+                        <!-- Loaded history and live messages will appear here -->
+                    </div>
+
+                    <form id="chatForm" class="message-input-bar">
+                        <input
+                            type="text"
+                            id="messageInput"
+                            placeholder="Type a message..."
+                            autocomplete="off"
+                            required>
+                        <button type="submit" id="sendMessageBtn" class="primary-btn">Send</button>
+                    </form>
+                </section>
+
+                <!-- Members Sidebar -->
+                <aside class="chat-sidebar">
+                    <div class="sidebar-header">
+                        <h3>Members</h3>
+                    </div>
+                    <div id="groupMembersList" class="sidebar-members-list">
+                        <!-- Members populated here -->
+                    </div>
+                </aside>
+            </div>
+        </main>
+
+    </div>
+
+    <!-- CREATE GROUP MODAL -->
+    <div id="createGroupModal" class="modal-overlay" style="display: none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Create New Group</h3>
+                <button id="closeModalBtn" class="modal-close">&times;</button>
+            </div>
+
+            <div id="createGroupError" class="auth-error" style="display: none;"></div>
+
+            <form id="createGroupForm">
+                <div class="form-group">
+                    <label for="newGroupName">Group Name</label>
+                    <input
+                        type="text"
+                        id="newGroupName"
+                        placeholder="e.g. CSE-A"
+                        maxlength="50"
+                        required>
+                </div>
+
+                <div class="form-group">
+                    <label for="newGroupDesc">Description</label>
+                    <textarea
+                        id="newGroupDesc"
+                        rows="3"
+                        placeholder="e.g. CSE A student discussion and announcements"
+                        maxlength="250"></textarea>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" id="cancelModalBtn" class="secondary-btn">Cancel</button>
+                    <button type="submit" id="submitCreateGroupBtn" class="primary-btn">Create Group</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
