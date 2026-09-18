@@ -2,10 +2,13 @@ package chat.service;
 
 import chat.dto.CreateGroupRequest;
 import chat.dto.GroupResponseDto;
+import chat.dto.JoinRequestDto;
 import chat.dto.UserSummaryDto;
 import chat.model.Group;
+import chat.model.JoinRequest;
 import chat.model.User;
 import chat.repository.GroupRepository;
+import chat.repository.JoinRequestRepository;
 import chat.repository.MessageRepository;
 import chat.repository.UserRepository;
 import org.springframework.http.HttpStatus;
@@ -23,15 +26,18 @@ public class GroupService {
     private final GroupRepository groupRepository;
     private final UserRepository userRepository;
     private final MessageRepository messageRepository;
+    private final JoinRequestRepository joinRequestRepository;
     private final SecureRandom secureRandom = new SecureRandom();
 
     public GroupService(
             GroupRepository groupRepository,
             UserRepository userRepository,
-            MessageRepository messageRepository) {
+            MessageRepository messageRepository,
+            JoinRequestRepository joinRequestRepository) {
         this.groupRepository = groupRepository;
         this.userRepository = userRepository;
         this.messageRepository = messageRepository;
+        this.joinRequestRepository = joinRequestRepository;
     }
 
     public GroupResponseDto createGroup(CreateGroupRequest request, String creatorId) {
@@ -183,6 +189,102 @@ public class GroupService {
 
         groupRepository.deleteById(groupId);
         messageRepository.deleteByGroupId(groupId);
+        joinRequestRepository.deleteByGroupId(groupId);
+    }
+
+    public JoinRequestDto requestToJoin(String groupId, String userId) {
+        Group group = findGroupOrThrow(groupId);
+
+        if (group.isPublic()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This is a public group. You can join directly without requesting.");
+        }
+
+        if (group.hasMember(userId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You are already a member of this group.");
+        }
+
+        if (joinRequestRepository.existsByGroupIdAndUserIdAndStatus(groupId, userId, "PENDING")) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "You already have a pending join request for this group.");
+        }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        JoinRequest request = new JoinRequest(groupId, userId, user.getUsername());
+        request = joinRequestRepository.save(request);
+
+        return new JoinRequestDto(request.getId(), request.getGroupId(), request.getUserId(), request.getUsername(), request.getStatus(), request.getRequestedAt());
+    }
+
+    public List<JoinRequestDto> getPendingJoinRequests(String groupId, String adminUserId) {
+        Group group = findGroupOrThrow(groupId);
+
+        if (!group.isAdmin(adminUserId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the group administrator can view join requests.");
+        }
+
+        List<JoinRequest> requests = joinRequestRepository.findByGroupIdAndStatusOrderByRequestedAtDesc(groupId, "PENDING");
+        return requests.stream()
+                .map(r -> new JoinRequestDto(r.getId(), r.getGroupId(), r.getUserId(), r.getUsername(), r.getStatus(), r.getRequestedAt()))
+                .collect(Collectors.toList());
+    }
+
+    public GroupResponseDto reviewJoinRequest(String groupId, String requestId, boolean approve, String adminUserId) {
+        Group group = findGroupOrThrow(groupId);
+
+        if (!group.isAdmin(adminUserId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the group administrator can review join requests.");
+        }
+
+        JoinRequest request = joinRequestRepository.findById(requestId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Join request not found"));
+
+        if (!request.getGroupId().equals(groupId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Join request does not belong to this group.");
+        }
+
+        if (!"PENDING".equalsIgnoreCase(request.getStatus())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This request has already been reviewed.");
+        }
+
+        if (approve) {
+            group.addMember(request.getUserId());
+            group = groupRepository.save(group);
+            request.setStatus("APPROVED");
+        } else {
+            request.setStatus("REJECTED");
+        }
+
+        request.setReviewedAt(Instant.now());
+        request.setReviewedBy(adminUserId);
+        joinRequestRepository.save(request);
+
+        String creatorUsername = userRepository.findById(group.getCreatedBy())
+                .map(User::getUsername)
+                .orElse("Unknown");
+        return toDto(group, adminUserId, creatorUsername);
+    }
+
+    public GroupResponseDto regenerateInviteCode(String groupId, String adminUserId) {
+        Group group = findGroupOrThrow(groupId);
+
+        if (!group.isAdmin(adminUserId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the group administrator can regenerate invite code.");
+        }
+
+        if (!group.isPrivate()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only private groups have invite codes.");
+        }
+
+        String newCode = generateUniqueInviteCode(group.getName());
+        group.setInviteCode(newCode);
+        group.setUpdatedAt(Instant.now());
+        group = groupRepository.save(group);
+
+        String creatorUsername = userRepository.findById(group.getCreatedBy())
+                .map(User::getUsername)
+                .orElse("Unknown");
+        return toDto(group, adminUserId, creatorUsername);
     }
 
     public void removeMember(String groupId, String targetUserId, String requestingUserId) {
@@ -260,6 +362,20 @@ public class GroupService {
         boolean isAdmin = currentUserId != null && group.isAdmin(currentUserId);
         dto.setMember(isMember);
         dto.setAdmin(isAdmin);
+
+        // Populate pending request flag for current user
+        if (currentUserId != null && !isMember && group.isPrivate() && group.getId() != null) {
+            dto.setHasPendingRequest(joinRequestRepository.existsByGroupIdAndUserIdAndStatus(group.getId(), currentUserId, "PENDING"));
+        } else {
+            dto.setHasPendingRequest(false);
+        }
+
+        // Populate pending request count for admin
+        if (isAdmin && group.getId() != null) {
+            dto.setPendingRequestCount(joinRequestRepository.findByGroupIdAndStatusOrderByRequestedAtDesc(group.getId(), "PENDING").size());
+        } else {
+            dto.setPendingRequestCount(0);
+        }
 
         // Security: only expose invite code to members or administrator of private groups
         if (group.isPrivate() && (isMember || isAdmin)) {

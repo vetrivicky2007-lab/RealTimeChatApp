@@ -18,6 +18,8 @@ public class GroupResponseDto {
     private List<String> members;
     private boolean isMember;
     private boolean isAdmin;
+    private boolean hasPendingRequest;
+    private int pendingRequestCount;
 
     public GroupResponseDto() {
     }
@@ -124,5 +126,21 @@ public class GroupResponseDto {
 
     public void setAdmin(boolean admin) {
         isAdmin = admin;
+    }
+
+    public boolean isHasPendingRequest() {
+        return hasPendingRequest;
+    }
+
+    public void setHasPendingRequest(boolean hasPendingRequest) {
+        this.hasPendingRequest = hasPendingRequest;
+    }
+
+    public int getPendingRequestCount() {
+        return pendingRequestCount;
+    }
+
+    public void setPendingRequestCount(int pendingRequestCount) {
+        this.pendingRequestCount = pendingRequestCount;
     }
 }

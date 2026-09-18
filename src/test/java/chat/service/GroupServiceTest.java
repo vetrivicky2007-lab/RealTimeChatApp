@@ -33,11 +33,14 @@ class GroupServiceTest {
     @Mock
     private MessageRepository messageRepository;
 
+    @Mock
+    private chat.repository.JoinRequestRepository joinRequestRepository;
+
     private GroupService groupService;
 
     @BeforeEach
     void setUp() {
-        groupService = new GroupService(groupRepository, userRepository, messageRepository);
+        groupService = new GroupService(groupRepository, userRepository, messageRepository, joinRequestRepository);
     }
 
     @Test
@@ -186,5 +189,99 @@ class GroupServiceTest {
         assertDoesNotThrow(() -> groupService.deleteGroup("group1", "adminUser"));
         verify(groupRepository, times(1)).deleteById("group1");
         verify(messageRepository, times(1)).deleteByGroupId("group1");
+        verify(joinRequestRepository, times(1)).deleteByGroupId("group1");
+    }
+
+    @Test
+    void testRequestToJoinPrivateGroupSuccess() {
+        Group group = new Group("Secret Club", "Private discussion", "admin1", "PRIVATE", "CLUB-12345");
+        group.setId("group1");
+        User requestingUser = new User("kumar", "kumar@example.com", "hash");
+        requestingUser.setId("user2");
+
+        when(groupRepository.findById("group1")).thenReturn(Optional.of(group));
+        when(joinRequestRepository.existsByGroupIdAndUserIdAndStatus("group1", "user2", "PENDING")).thenReturn(false);
+        when(userRepository.findById("user2")).thenReturn(Optional.of(requestingUser));
+        when(joinRequestRepository.save(any(chat.model.JoinRequest.class))).thenAnswer(i -> {
+            chat.model.JoinRequest r = i.getArgument(0);
+            r.setId("req1");
+            return r;
+        });
+
+        chat.dto.JoinRequestDto dto = groupService.requestToJoin("group1", "user2");
+
+        assertNotNull(dto);
+        assertEquals("group1", dto.getGroupId());
+        assertEquals("user2", dto.getUserId());
+        assertEquals("kumar", dto.getUsername());
+        assertEquals("PENDING", dto.getStatus());
+    }
+
+    @Test
+    void testRequestToJoinDuplicateFails() {
+        Group group = new Group("Secret Club", "Private discussion", "admin1", "PRIVATE", "CLUB-12345");
+        group.setId("group1");
+
+        when(groupRepository.findById("group1")).thenReturn(Optional.of(group));
+        when(joinRequestRepository.existsByGroupIdAndUserIdAndStatus("group1", "user2", "PENDING")).thenReturn(true);
+
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+                () -> groupService.requestToJoin("group1", "user2"));
+
+        assertEquals(HttpStatus.CONFLICT, ex.getStatusCode());
+    }
+
+    @Test
+    void testAdminApproveJoinRequest() {
+        Group group = new Group("Secret Club", "Private discussion", "admin1", "PRIVATE", "CLUB-12345");
+        group.setId("group1");
+
+        chat.model.JoinRequest request = new chat.model.JoinRequest("group1", "user2", "kumar");
+        request.setId("req1");
+
+        when(groupRepository.findById("group1")).thenReturn(Optional.of(group));
+        when(joinRequestRepository.findById("req1")).thenReturn(Optional.of(request));
+        when(groupRepository.save(any(Group.class))).thenAnswer(i -> i.getArgument(0));
+        when(joinRequestRepository.save(any(chat.model.JoinRequest.class))).thenAnswer(i -> i.getArgument(0));
+
+        GroupResponseDto result = groupService.reviewJoinRequest("group1", "req1", true, "admin1");
+
+        assertNotNull(result);
+        assertTrue(group.hasMember("user2"));
+        assertEquals("APPROVED", request.getStatus());
+    }
+
+    @Test
+    void testAdminRejectJoinRequest() {
+        Group group = new Group("Secret Club", "Private discussion", "admin1", "PRIVATE", "CLUB-12345");
+        group.setId("group1");
+
+        chat.model.JoinRequest request = new chat.model.JoinRequest("group1", "user2", "kumar");
+        request.setId("req1");
+
+        when(groupRepository.findById("group1")).thenReturn(Optional.of(group));
+        when(joinRequestRepository.findById("req1")).thenReturn(Optional.of(request));
+        when(joinRequestRepository.save(any(chat.model.JoinRequest.class))).thenAnswer(i -> i.getArgument(0));
+
+        groupService.reviewJoinRequest("group1", "req1", false, "admin1");
+
+        assertFalse(group.hasMember("user2"));
+        assertEquals("REJECTED", request.getStatus());
+    }
+
+    @Test
+    void testAdminRegenerateInviteCode() {
+        Group group = new Group("Secret Club", "Private discussion", "admin1", "PRIVATE", "CLUB-12345");
+        group.setId("group1");
+
+        when(groupRepository.findById("group1")).thenReturn(Optional.of(group));
+        when(groupRepository.existsByInviteCode(anyString())).thenReturn(false);
+        when(groupRepository.save(any(Group.class))).thenAnswer(i -> i.getArgument(0));
+
+        GroupResponseDto result = groupService.regenerateInviteCode("group1", "admin1");
+
+        assertNotNull(result);
+        assertNotEquals("CLUB-12345", result.getInviteCode());
+        assertTrue(result.getInviteCode().startsWith("SECR-"));
     }
 }

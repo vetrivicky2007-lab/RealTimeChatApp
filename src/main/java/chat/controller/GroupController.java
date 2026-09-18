@@ -3,6 +3,7 @@ package chat.controller;
 import chat.dto.CreateGroupRequest;
 import chat.dto.GroupResponseDto;
 import chat.dto.JoinPrivateGroupRequest;
+import chat.dto.JoinRequestDto;
 import chat.dto.MessageDto;
 import chat.dto.UserSummaryDto;
 import chat.security.UserPrincipal;
@@ -80,6 +81,44 @@ public class GroupController {
             @AuthenticationPrincipal UserPrincipal userPrincipal) {
         ensureAuthenticated(userPrincipal);
         GroupResponseDto group = groupService.joinPrivateGroup(null, request.getInviteCode(), userPrincipal.getId());
+        return ResponseEntity.ok(group);
+    }
+
+    @PostMapping("/{groupId}/join-request")
+    public ResponseEntity<JoinRequestDto> requestToJoin(
+            @PathVariable String groupId,
+            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        ensureAuthenticated(userPrincipal);
+        JoinRequestDto request = groupService.requestToJoin(groupId, userPrincipal.getId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(request);
+    }
+
+    @GetMapping("/{groupId}/join-requests")
+    public ResponseEntity<List<JoinRequestDto>> getJoinRequests(
+            @PathVariable String groupId,
+            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        ensureAuthenticated(userPrincipal);
+        List<JoinRequestDto> requests = groupService.getPendingJoinRequests(groupId, userPrincipal.getId());
+        return ResponseEntity.ok(requests);
+    }
+
+    @PostMapping("/{groupId}/join-requests/{requestId}/review")
+    public ResponseEntity<GroupResponseDto> reviewJoinRequest(
+            @PathVariable String groupId,
+            @PathVariable String requestId,
+            @RequestParam(defaultValue = "true") boolean approve,
+            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        ensureAuthenticated(userPrincipal);
+        GroupResponseDto group = groupService.reviewJoinRequest(groupId, requestId, approve, userPrincipal.getId());
+        return ResponseEntity.ok(group);
+    }
+
+    @PostMapping("/{groupId}/regenerate-code")
+    public ResponseEntity<GroupResponseDto> regenerateInviteCode(
+            @PathVariable String groupId,
+            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        ensureAuthenticated(userPrincipal);
+        GroupResponseDto group = groupService.regenerateInviteCode(groupId, userPrincipal.getId());
         return ResponseEntity.ok(group);
     }
 
