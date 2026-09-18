@@ -8,12 +8,15 @@
 
 const CONFIG = {
     // Backend API URL:
-    // When running locally, points to http://localhost:8080.
-    // For Render, replace with your Render backend URL, e.g.: "https://unihive-backend.onrender.com"
-    API_BASE_URL: window.API_BASE_URL || (
+    // Resolves in order:
+    // 1. localStorage override ("unihive_api_url")
+    // 2. window.API_BASE_URL
+    // 3. Localhost (http://localhost:8080) if running locally
+    // 4. Default Render deployment: https://realtimechatapp-1-e4j1.onrender.com
+    API_BASE_URL: localStorage.getItem("unihive_api_url") || window.API_BASE_URL || (
         window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
             ? "http://localhost:8080"
-            : window.location.origin
+            : (window.location.origin.startsWith("http") && !window.location.origin.includes("github.io") ? window.location.origin : "https://realtimechatapp-1-e4j1.onrender.com")
     ),
 
     // Dynamically computes the WebSocket URL based on the API URL
