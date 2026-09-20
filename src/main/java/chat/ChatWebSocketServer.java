@@ -27,8 +27,14 @@ public class ChatWebSocketServer extends WebSocketServer {
             ClientHandshake handshake) {
 
         System.out.println(
-                "WebSocket client connected: "
-                + conn.getRemoteSocketAddress());
+                "WEBSOCKET HANDSHAKE SUCCESS: " +
+                conn.getRemoteSocketAddress()
+        );
+
+        System.out.println(
+                "REQUEST RESOURCE: " +
+                handshake.getResourceDescriptor()
+        );
     }
 
     @Override
@@ -43,8 +49,9 @@ public class ChatWebSocketServer extends WebSocketServer {
         broadcastUsers();
 
         System.out.println(
-                "WebSocket client disconnected: "
-                + (conn != null ? conn.getRemoteSocketAddress() : "unknown"));
+                "WEBSOCKET CLOSED: " +
+                code + " " + reason
+        );
     }
 
     @Override
@@ -99,13 +106,21 @@ public class ChatWebSocketServer extends WebSocketServer {
             WebSocket conn,
             Exception ex) {
 
-        ex.printStackTrace();
+        System.err.println(
+                "WEBSOCKET ERROR: " + (ex != null ? ex.getMessage() : "unknown")
+        );
+
+        if (ex != null) {
+            ex.printStackTrace();
+        }
     }
 
     @Override
     public void onStart() {
         System.out.println(
-                "WebSocket Server started on " + getAddress());
+                "WEBSOCKET SERVER READY: " +
+                getAddress()
+        );
     }
 
     public static void main(String[] args) {
