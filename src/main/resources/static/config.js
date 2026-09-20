@@ -16,18 +16,14 @@ const CONFIG = {
         if (window.WS_URL) return window.WS_URL;
         if (localStorage.getItem("unihive_ws_url")) return localStorage.getItem("unihive_ws_url");
 
-        // Render / HTTPS production deployment (never append :8887 on Render)
-        if (window.location.hostname.includes("onrender.com") || window.location.protocol === "https:") {
-            return `wss://${window.location.host}`;
-        }
-
-        // Local development environment: connects to ChatWebSocketServer on port 8887
-        if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || !window.location.hostname) {
-            return "ws://localhost:8887";
+        if (this.API_BASE_URL.startsWith("https://")) {
+            return this.API_BASE_URL.replace(/^https:/, "wss:") + "/ws";
+        } else if (this.API_BASE_URL.startsWith("http://")) {
+            return this.API_BASE_URL.replace(/^http:/, "ws:") + "/ws";
         }
 
         const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-        const host = window.location.host || "localhost:8887";
-        return `${protocol}//${host}`;
+        const host = window.location.host || "localhost:8080";
+        return `${protocol}//${host}/ws`;
     }
 };

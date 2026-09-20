@@ -69,6 +69,27 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     protected void handleTextMessage(WebSocketSession session, TextMessage message) {
         try {
             String payload = message.getPayload();
+            if (payload == null) return;
+
+            // Support plain text protocol (JOIN:<username> and plain message broadcast)
+            if (payload.startsWith("JOIN:")) {
+                String username = payload.substring(5).trim();
+                sessionUsers.put(session.getId(), new UserSessionInfo(session.getId(), username));
+                logger.info("Session {} registered via plain JOIN as user: {}", session.getId(), username);
+                try {
+                    session.sendMessage(new TextMessage("USERS:" + username));
+                } catch (Exception ignored) {}
+                return;
+            }
+
+            if (!payload.trim().startsWith("{")) {
+                TextMessage broadcastMsg = new TextMessage("MSG:" + payload);
+                try {
+                    session.sendMessage(broadcastMsg);
+                } catch (Exception ignored) {}
+                return;
+            }
+
             WsAction action = objectMapper.readValue(payload, WsAction.class);
 
             if (action == null || action.getType() == null) {
