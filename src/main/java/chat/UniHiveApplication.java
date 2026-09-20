@@ -17,12 +17,12 @@ public class UniHiveApplication {
         server.start();
 
         System.out.println("========================================");
-        System.out.println("        UNIHIVE WEBSOCKET SERVER        ");
+        System.out.println("UNIHIVE / REALTIME CHAT WEBSOCKET");
         System.out.println("========================================");
         System.out.println("Environment: " + (isRender ? "RENDER" : "LOCAL"));
         System.out.println("Host: 0.0.0.0");
         System.out.println("Port: " + wsPort);
-        System.out.println("WebSocket server started successfully");
+        System.out.println("WebSocket: READY");
         System.out.println("========================================");
         System.out.println("UniHive WebSocket server started on 0.0.0.0:" + wsPort);
 
