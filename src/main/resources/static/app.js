@@ -297,6 +297,56 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // ============================================================
+    // TOAST NOTIFICATION UTILITY
+    // ============================================================
+    function showToast(message, type = "info") {
+        let container = document.getElementById("toastContainer");
+        if (!container) {
+            container = document.createElement("div");
+            container.id = "toastContainer";
+            container.className = "toast-container";
+            document.body.appendChild(container);
+        }
+
+        const toast = document.createElement("div");
+        toast.className = `toast toast-${type}`;
+
+        let iconSvg = "";
+        if (type === "success") {
+            iconSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+        } else if (type === "error") {
+            iconSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`;
+        } else if (type === "warning") {
+            iconSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`;
+        } else {
+            iconSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`;
+        }
+
+        toast.innerHTML = `
+            <div class="toast-icon">${iconSvg}</div>
+            <div class="toast-content">${escapeHtml(message)}</div>
+            <button class="toast-close" type="button" aria-label="Dismiss">&times;</button>
+        `;
+
+        const closeBtn = toast.querySelector(".toast-close");
+        if (closeBtn) {
+            closeBtn.addEventListener("click", () => {
+                toast.classList.add("toast-leaving");
+                setTimeout(() => toast.remove(), 250);
+            });
+        }
+
+        container.appendChild(toast);
+
+        setTimeout(() => {
+            if (toast.isConnected) {
+                toast.classList.add("toast-leaving");
+                setTimeout(() => toast.remove(), 250);
+            }
+        }, 4000);
+    }
+
+    // ============================================================
     // 4. WEBSOCKET REAL-TIME MESSAGING ENGINE
     // ============================================================
     function initWebSocket() {
@@ -755,15 +805,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 buttonEl.className = "join-action-btn pending";
                 const group = allGroups.find(g => g.id === groupId);
                 if (group) group.hasPendingRequest = true;
+                showToast("Join request submitted to group admin", "success");
             } else {
                 const data = await res.json();
-                alert(data.error || "Failed to submit join request.");
+                showToast(data.error || "Failed to submit join request.", "error");
                 buttonEl.disabled = false;
                 buttonEl.textContent = "Request to Join";
             }
         } catch (err) {
             console.error("Submit join request error:", err);
-            alert("Network error submitting request.");
+            showToast("Network error submitting request.", "error");
             buttonEl.disabled = false;
             buttonEl.textContent = "Request to Join";
         }
@@ -779,13 +830,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 const updated = await res.json();
                 await loadGroups();
                 openGroupChat(updated);
+                showToast(`Joined ${updated.name}!`, "success");
             } else {
                 const data = await res.json();
-                alert(data.error || "Failed to join group.");
+                showToast(data.error || "Failed to join group.", "error");
             }
         } catch (err) {
             console.error("Join public group error:", err);
-            alert("Network error joining group.");
+            showToast("Network error joining group.", "error");
         }
     }
 
@@ -1079,13 +1131,14 @@ document.addEventListener("DOMContentLoaded", () => {
                         label.textContent = "Done!";
                         setTimeout(() => { label.textContent = "Regenerate"; }, 2000);
                         await loadGroups();
+                        showToast("Invite code regenerated", "success");
                     } else {
                         const data = await res.json();
-                        alert(data.error || "Failed to regenerate code.");
+                        showToast(data.error || "Failed to regenerate code.", "error");
                     }
                 } catch (e) {
                     console.error("Regenerate code error:", e);
-                    alert("Network error regenerating code.");
+                    showToast("Network error regenerating code.", "error");
                 }
             }
         );
@@ -1161,13 +1214,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 await loadGroupMembers(currentGroup.id);
                 await loadPendingJoinRequests(currentGroup.id);
                 await loadGroups();
+                showToast(approve ? "Request approved" : "Request rejected", "info");
             } else {
                 const data = await res.json();
-                alert(data.error || "Failed to review join request.");
+                showToast(data.error || "Failed to review join request.", "error");
             }
         } catch (e) {
             console.error("Review request error:", e);
-            alert("Network error reviewing join request.");
+            showToast("Network error reviewing join request.", "error");
         }
     }
 
@@ -1353,13 +1407,13 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!file) return;
 
         if (!file.type.startsWith("image/")) {
-            alert("Only image files (JPEG, PNG, WebP, GIF) are supported.");
+            showToast("Only image files (JPEG, PNG, WebP, GIF) are supported.", "warning");
             chatFileInput.value = "";
             return;
         }
 
         if (file.size > 15 * 1024 * 1024) {
-            alert("File size exceeds the 15MB limit.");
+            showToast("File size exceeds the 15MB limit.", "warning");
             chatFileInput.value = "";
             return;
         }
@@ -1449,7 +1503,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     const uploadData = await uploadRes.json();
                     uploadedMediaUrl = uploadData.url;
                 } else {
-                    alert("Failed to upload image. Please try again.");
+                    showToast("Failed to upload image. Please try again.", "error");
                     sendMessageBtn.disabled = false;
                     return;
                 }
@@ -1507,7 +1561,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         } catch (err) {
             console.error("Error sending message:", err);
-            alert("Error sending message. Please check connection.");
+            showToast("Error sending message. Please check connection.", "error");
         } finally {
             sendMessageBtn.disabled = false;
         }
@@ -1741,7 +1795,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             <div class="post-body">
                 ${post.title ? `<h3 class="post-title">${escapeHtml(post.title)}</h3>` : ''}
-                <div class="post-text-content">${escapeHtml(post.content).replace(/\n/g, '<br>')}</div>
+                <div class="post-text-content">${formatPostText(post.content)}</div>
                 ${linkHtml}
                 ${mediaHtml}
                 ${tagsHtml}
@@ -1946,10 +2000,11 @@ document.addEventListener("DOMContentLoaded", () => {
                         if (countEl) countEl.textContent = post.commentCount;
                     } else {
                         const err = await res.json();
-                        alert(err.error || "Failed to post comment.");
+                        showToast(err.error || "Failed to post comment.", "error");
                     }
                 } catch (err) {
                     console.error("Comment submit error:", err);
+                    showToast("Network error submitting comment.", "error");
                 } finally {
                     submitBtn.disabled = false;
                 }
@@ -1957,6 +2012,14 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         postsFeedContainer.appendChild(card);
+    }
+
+    // Helper: auto-link URLs in post content safely
+    function formatPostText(text) {
+        if (!text) return "";
+        const escaped = escapeHtml(text);
+        const urlRegex = /(https?:\/\/[^\s<]+[^<.,:;"')\]\s])/g;
+        return escaped.replace(urlRegex, (url) => `<a href="${url}" target="_blank" rel="noopener noreferrer" class="post-inline-link">${url}</a>`).replace(/\n/g, '<br>');
     }
 
     document.addEventListener("click", (e) => {
@@ -1969,6 +2032,11 @@ document.addEventListener("DOMContentLoaded", () => {
     // 16. SOCIAL ACTIONS: LIKE & DISLIKE TOGGLE
     // ============================================================
     async function handleReaction(postId, type, card) {
+        const likeBtn = card.querySelector(".btn-post-like");
+        const dislikeBtn = card.querySelector(".btn-post-dislike");
+        if (likeBtn) likeBtn.disabled = true;
+        if (dislikeBtn) dislikeBtn.disabled = true;
+
         try {
             const res = await apiRequest(`/api/posts/${postId}/react`, {
                 method: "POST",
@@ -1977,8 +2045,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (res && res.ok) {
                 const result = await res.json();
-                const likeBtn = card.querySelector(".btn-post-like");
-                const dislikeBtn = card.querySelector(".btn-post-dislike");
                 const likeCountEl = card.querySelector(".like-count");
                 const dislikeCountEl = card.querySelector(".dislike-count");
 
@@ -1998,6 +2064,9 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         } catch (e) {
             console.error("Reaction error:", e);
+        } finally {
+            if (likeBtn) likeBtn.disabled = false;
+            if (dislikeBtn) dislikeBtn.disabled = false;
         }
     }
 
@@ -2005,6 +2074,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // 17. BOOKMARKING & SAVED POSTS
     // ============================================================
     async function handleBookmarkToggle(postId, bookmarkBtn) {
+        bookmarkBtn.disabled = true;
+
         try {
             const res = await apiRequest(`/api/posts/${postId}/bookmark`, {
                 method: "POST"
@@ -2018,14 +2089,18 @@ document.addEventListener("DOMContentLoaded", () => {
                     bookmarkBtn.classList.add("active-bookmark");
                     bookmarkBtn.title = "Remove Bookmark";
                     bookmarkBtn.querySelector("svg").setAttribute("fill", "currentColor");
+                    showToast("Post saved to bookmarks", "success");
                 } else {
                     bookmarkBtn.classList.remove("active-bookmark");
                     bookmarkBtn.title = "Save Post";
                     bookmarkBtn.querySelector("svg").setAttribute("fill", "none");
+                    showToast("Post removed from bookmarks", "info");
                 }
             }
         } catch (e) {
             console.error("Bookmark error:", e);
+        } finally {
+            bookmarkBtn.disabled = false;
         }
     }
 
@@ -2108,7 +2183,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }).catch(() => {});
         } else {
             navigator.clipboard.writeText(shareUrl).then(() => {
-                alert("Post link copied to clipboard!");
+                showToast("Post link copied to clipboard!", "success");
             }).catch(() => {
                 prompt("Copy post link:", shareUrl);
             });
@@ -2243,6 +2318,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const result = await res.json();
                 updatePostVerificationInDOM(postId, result);
                 closeVerificationModal();
+                showToast("Assessment submitted successfully", "success");
             } else {
                 const err = await res.json();
                 verificationModalError.textContent = err.error || "Failed to submit verification.";
@@ -2273,12 +2349,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 const result = await res.json();
                 updatePostVerificationInDOM(postId, result);
                 closeVerificationModal();
+                showToast("Assessment vote removed", "info");
             } else {
                 const err = await res.json();
-                alert(err.error || "Failed to remove verification vote.");
+                showToast(err.error || "Failed to remove verification vote.", "error");
             }
         } catch (e) {
             console.error("Remove verification vote error:", e);
+            showToast("Network error removing verification vote.", "error");
         } finally {
             removeVerificationVoteBtn.disabled = false;
         }
@@ -2445,13 +2523,13 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!file) return;
 
         if (!file.type.startsWith("image/")) {
-            alert("Please select a valid image file (JPEG, PNG, WebP, GIF).");
+            showToast("Please select a valid image file (JPEG, PNG, WebP, GIF).", "warning");
             postImageFileInput.value = "";
             return;
         }
 
         if (file.size > 15 * 1024 * 1024) {
-            alert("Image size exceeds 15MB limit.");
+            showToast("Image size exceeds 15MB limit.", "warning");
             postImageFileInput.value = "";
             return;
         }
@@ -2519,6 +2597,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (res.ok) {
                 closeCreatePostModal();
                 loadCommunityPosts(0, false);
+                showToast("Post published successfully", "success");
             } else {
                 const data = await res.json();
                 createPostError.textContent = data.error || "Failed to publish post.";
@@ -2597,6 +2676,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (res && res.ok) {
                 closeEditPostModal();
                 loadCommunityPosts(postsPage, false);
+                showToast("Post updated successfully", "success");
             } else {
                 const data = await res.json();
                 editPostError.textContent = data.error || "Failed to update post.";
@@ -2630,13 +2710,14 @@ document.addEventListener("DOMContentLoaded", () => {
                             postsEmptyState.style.display = "flex";
                             postsFeedContainer.style.display = "none";
                         }
+                        showToast("Post deleted", "info");
                     } else {
                         const data = await res.json();
-                        alert(data.error || "Failed to delete post.");
+                        showToast(data.error || "Failed to delete post.", "error");
                     }
                 } catch (e) {
                     console.error("Delete post error:", e);
-                    alert("Network error deleting post.");
+                    showToast("Network error deleting post.", "error");
                 }
             }
         );
@@ -2682,7 +2763,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (res && res.ok) {
                 closeReportPostModal();
-                alert("Thank you. Your report has been submitted to community moderators.");
+                showToast("Thank you. Your report has been submitted to community moderators.", "success");
             } else {
                 const data = await res.json();
                 reportPostError.textContent = data.error || "Failed to submit report.";
@@ -2772,13 +2853,14 @@ document.addEventListener("DOMContentLoaded", () => {
                     if (res.ok) {
                         closeGroupChat();
                         await loadGroups();
+                        showToast("Left group successfully", "info");
                     } else {
                         const data = await res.json();
-                        alert(data.error || "Failed to leave group.");
+                        showToast(data.error || "Failed to leave group.", "error");
                     }
                 } catch (e) {
                     console.error("Leave group error:", e);
-                    alert("Network error leaving group.");
+                    showToast("Network error leaving group.", "error");
                 }
             }
         );
@@ -2799,13 +2881,14 @@ document.addEventListener("DOMContentLoaded", () => {
                     if (res.ok) {
                         closeGroupChat();
                         await loadGroups();
+                        showToast("Group deleted successfully", "info");
                     } else {
                         const data = await res.json();
-                        alert(data.error || "Failed to delete group.");
+                        showToast(data.error || "Failed to delete group.", "error");
                     }
                 } catch (e) {
                     console.error("Delete group error:", e);
-                    alert("Network error deleting group.");
+                    showToast("Network error deleting group.", "error");
                 }
             }
         );
