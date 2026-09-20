@@ -362,13 +362,17 @@ document.addEventListener("DOMContentLoaded", () => {
     // SIDEBAR COLLAPSE TOGGLE
     // ============================================================
     const sidebarCollapseBtn = document.getElementById("sidebarCollapseBtn");
-    if (sidebarCollapseBtn) {
+    const messengerLayout = document.querySelector(".messenger-layout");
+    
+    if (sidebarCollapseBtn && messengerLayout) {
         // Restore state from sessionStorage
         if (sessionStorage.getItem("unihive_sidebar_collapsed") === "true") {
             leftSidebar.classList.add("collapsed");
+            messengerLayout.classList.add("sidebar-collapsed");
         }
         sidebarCollapseBtn.addEventListener("click", () => {
             leftSidebar.classList.toggle("collapsed");
+            messengerLayout.classList.toggle("sidebar-collapsed");
             sessionStorage.setItem("unihive_sidebar_collapsed",
                 leftSidebar.classList.contains("collapsed") ? "true" : "false");
         });
@@ -1885,7 +1889,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const timeStr = formatTimestamp(msg.timestamp);
         
         // 1. Date Separator Logic
-        const msgDateIso = new Date(msg.timestamp || Date.now()).toISOString();
+        const msgDateIso = parseTimestamp(msg.timestamp || Date.now()).toISOString();
         const dateLabel = getDateLabel(msgDateIso);
         if (dateLabel !== lastRenderedDate) {
             messagesList.appendChild(createDateSeparator(dateLabel));
@@ -1895,7 +1899,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // 2. Sender Grouping Logic (within 5 minutes)
         let isGrouped = false;
-        const msgTimeMs = new Date(msg.timestamp || Date.now()).getTime();
+        const msgTimeMs = parseTimestamp(msg.timestamp || Date.now()).getTime();
         
         if (lastRenderedMessage) {
             const timeDiff = msgTimeMs - lastRenderedMessage.timestamp;
@@ -1976,10 +1980,44 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    function parseTimestamp(val) {
+        if (!val) return new Date();
+        
+        // Handle Spring Boot array serialization [2026, 9, 20, 15, 56, 0]
+        if (Array.isArray(val)) {
+            if (val.length >= 3) {
+                return new Date(Date.UTC(
+                    val[0], val[1] - 1, val[2], 
+                    val[3] || 0, val[4] || 0, val[5] || 0, 
+                    val[6] ? Math.floor(val[6]/1000000) : 0
+                ));
+            }
+        }
+        
+        // Handle numeric timestamps
+        if (typeof val === 'number') {
+            if (val < 10000000000) {
+                return new Date(val * 1000); // Convert epoch seconds to ms
+            }
+            return new Date(val);
+        }
+        
+        // Handle purely numeric strings
+        if (typeof val === 'string' && /^\d+(\.\d+)?$/.test(val)) {
+            let numVal = parseFloat(val);
+            if (numVal < 10000000000) {
+                return new Date(numVal * 1000);
+            }
+            return new Date(numVal);
+        }
+        
+        return new Date(val);
+    }
+
     function formatTimestamp(isoStr) {
         if (!isoStr) return "";
         try {
-            const date = new Date(isoStr);
+            const date = parseTimestamp(isoStr);
             const hours = String(date.getHours()).padStart(2, "0");
             const minutes = String(date.getMinutes()).padStart(2, "0");
             return `${hours}:${minutes}`;
@@ -1991,7 +2029,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function formatTimeShort(isoStr) {
         if (!isoStr) return "";
         try {
-            const date = new Date(isoStr);
+            const date = parseTimestamp(isoStr);
             const now = new Date();
             const isToday = date.toDateString() === now.toDateString();
             if (isToday) {
@@ -2008,7 +2046,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function formatRelativeTime(isoStr) {
         if (!isoStr) return "";
         try {
-            const date = new Date(isoStr);
+            const date = parseTimestamp(isoStr);
             const now = new Date();
             const diffSeconds = Math.floor((now - date) / 1000);
 
