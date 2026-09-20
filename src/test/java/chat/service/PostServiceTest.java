@@ -44,6 +44,9 @@ class PostServiceTest {
     private PostReportRepository reportRepository;
 
     @Mock
+    private PostViewRepository viewRepository;
+
+    @Mock
     private GroupRepository groupRepository;
 
     @Mock
@@ -70,6 +73,7 @@ class PostServiceTest {
                 verificationRepository,
                 bookmarkRepository,
                 reportRepository,
+                viewRepository,
                 groupRepository,
                 userRepository,
                 cloudinaryService,

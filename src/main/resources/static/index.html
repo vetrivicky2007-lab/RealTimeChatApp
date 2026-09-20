@@ -17,6 +17,13 @@
             <!-- Sidebar Header -->
             <header class="sidebar-header">
                 <div class="brand-block">
+                    <button id="sidebarCollapseBtn" class="icon-btn sidebar-collapse-btn" title="Toggle Sidebar" aria-label="Toggle sidebar navigation">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <line x1="3" y1="12" x2="21" y2="12"></line>
+                            <line x1="3" y1="18" x2="21" y2="18"></line>
+                        </svg>
+                    </button>
                     <div class="brand-icon">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
@@ -190,6 +197,26 @@
                     </div>
 
                     <div class="navbar-right">
+                        <!-- Notification Bell -->
+                        <div class="notification-wrapper">
+                            <button id="notificationBellBtn" class="icon-btn" title="Notifications" aria-label="View notifications">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                                </svg>
+                                <span id="notificationBadge" class="notification-badge" style="display: none;">0</span>
+                            </button>
+                            <div id="notificationDropdown" class="notification-panel" style="display: none;">
+                                <div class="notification-panel-header">
+                                    <strong>Notifications</strong>
+                                    <button id="clearNotificationsBtn" class="text-btn-sm" aria-label="Clear all notifications">Clear all</button>
+                                </div>
+                                <div id="notificationList" class="notification-list">
+                                    <div class="notification-empty">No notifications yet</div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Toggle Group Info Drawer -->
                         <button id="toggleInfoDrawerBtn" class="icon-btn" title="Group Details" aria-label="Group Details">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -300,6 +327,22 @@
                             </div>
                             <span id="typingText" class="typing-label">User is typing...</span>
                         </div>
+
+                        <!-- Scroll to Bottom FAB -->
+                        <button id="scrollToBottomBtn" class="scroll-to-bottom-btn" style="display: none;" aria-label="Scroll to latest messages">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                            <span id="scrollUnreadBadge" class="scroll-unread-badge" style="display: none;">0</span>
+                        </button>
+
+                        <!-- New Messages Indicator -->
+                        <div id="newMessagesIndicator" class="new-messages-indicator" style="display: none;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                            <span id="newMsgCount">New messages</span>
+                        </div>
                     </div>
 
                     <!-- Message Composer -->
@@ -343,12 +386,11 @@
                     <!-- Posts Action & Filter Bar -->
                     <div class="posts-action-bar">
                         <div class="posts-action-left">
-                            <button id="openCreatePostModalBtn" class="action-btn primary-action-btn create-post-trigger-btn">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <button id="openCreatePostModalBtn" class="icon-btn create-post-icon-btn" title="Create Post" aria-label="Create a new post">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <line x1="12" y1="5" x2="12" y2="19"></line>
                                     <line x1="5" y1="12" x2="19" y2="12"></line>
                                 </svg>
-                                <span>Create Post</span>
                             </button>
 
                             <div class="category-filter-select-wrapper">
@@ -1002,6 +1044,40 @@
             <img id="lightboxImage" src="" alt="Fullscreen image">
         </div>
     </div>
+
+    <!-- COMMENT DRAWER PANEL -->
+    <div id="commentDrawerBackdrop" class="comment-drawer-backdrop" style="display: none;"></div>
+    <aside id="commentDrawerPanel" class="comment-drawer" style="display: none;" role="dialog" aria-modal="true" aria-label="Post comments">
+        <div class="comment-drawer-header">
+            <div class="comment-drawer-title-row">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <strong>Comments</strong>
+                <span id="drawerCommentCount" class="comment-drawer-count">0</span>
+            </div>
+            <button id="closeCommentDrawerBtn" class="icon-btn" aria-label="Close comments">&times;</button>
+        </div>
+        <div class="comment-drawer-post-preview" id="drawerPostPreview">
+            <!-- Post title/author preview rendered dynamically -->
+        </div>
+        <div class="comment-drawer-list" id="drawerCommentsList">
+            <!-- Comments rendered dynamically -->
+        </div>
+        <div id="drawerReplyIndicator" class="comment-reply-indicator" style="display: none;">
+            <span>↩ Replying to <strong id="replyToUsername">@user</strong></span>
+            <button id="cancelReplyBtn" class="icon-btn" aria-label="Cancel reply">&times;</button>
+        </div>
+        <form id="drawerCommentForm" class="comment-drawer-composer">
+            <input type="text" id="drawerCommentInput" class="comment-input" placeholder="Write a comment..." maxlength="1000" autocomplete="off" required>
+            <button type="submit" id="drawerCommentSubmitBtn" class="comment-submit-btn" aria-label="Submit comment">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+            </button>
+        </form>
+    </aside>
 
     <!-- TOAST NOTIFICATION CONTAINER -->
     <div id="toastContainer" class="toast-container" aria-live="polite"></div>

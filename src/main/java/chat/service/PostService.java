@@ -30,6 +30,7 @@ public class PostService {
     private final PostVerificationRepository verificationRepository;
     private final PostBookmarkRepository bookmarkRepository;
     private final PostReportRepository reportRepository;
+    private final PostViewRepository viewRepository;
     private final GroupRepository groupRepository;
     private final UserRepository userRepository;
     private final CloudinaryService cloudinaryService;
@@ -42,6 +43,7 @@ public class PostService {
             PostVerificationRepository verificationRepository,
             PostBookmarkRepository bookmarkRepository,
             PostReportRepository reportRepository,
+            PostViewRepository viewRepository,
             GroupRepository groupRepository,
             UserRepository userRepository,
             CloudinaryService cloudinaryService,
@@ -52,6 +54,7 @@ public class PostService {
         this.verificationRepository = verificationRepository;
         this.bookmarkRepository = bookmarkRepository;
         this.reportRepository = reportRepository;
+        this.viewRepository = viewRepository;
         this.groupRepository = groupRepository;
         this.userRepository = userRepository;
         this.cloudinaryService = cloudinaryService;
@@ -413,6 +416,9 @@ public class PostService {
                 user.getUsername(),
                 dto.getContent().trim()
         );
+        if (dto.getParentCommentId() != null) {
+            comment.setParentCommentId(dto.getParentCommentId());
+        }
 
         PostComment saved = commentRepository.save(comment);
 
@@ -429,8 +435,25 @@ public class PostService {
                 saved.getContent(),
                 saved.getCreatedAt(),
                 saved.getUpdatedAt(),
-                true
+                true,
+                saved.getParentCommentId(),
+                saved.isEdited()
         );
+    }
+
+    public PostComment editComment(String commentId, String userId, String newContent) {
+        PostComment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment not found"));
+
+        if (!comment.getAuthorId().equals(userId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the author can edit this comment");
+        }
+
+        comment.setContent(newContent.trim());
+        comment.setEdited(true);
+        comment.setUpdatedAt(Instant.now());
+
+        return commentRepository.save(comment);
     }
 
     public Page<CommentResponseDto> getComments(String postId, String userId, int page, int size) {
@@ -460,7 +483,9 @@ public class PostService {
                     c.getContent(),
                     c.getCreatedAt(),
                     c.getUpdatedAt(),
-                    canDelete
+                    canDelete,
+                    c.getParentCommentId(),
+                    c.isEdited()
             );
         }).collect(Collectors.toList());
 
@@ -569,10 +594,23 @@ public class PostService {
         reportRepository.save(report);
     }
 
-    public void trackPostView(String postId, String userId) {
+    public long recordView(String postId, String userId) {
         Post post = findPostOrThrow(postId);
-        post.setViewCount(post.getViewCount() + 1);
+        if (userId != null) {
+            try {
+                viewRepository.save(new PostView(postId, userId));
+            } catch (org.springframework.dao.DuplicateKeyException e) {
+                // already viewed, ignore
+            }
+        }
+        long count = viewRepository.countByPostId(postId);
+        post.setViewCount((int) count);
         postRepository.save(post);
+        return count;
+    }
+
+    public long getViewCount(String postId) {
+        return viewRepository.countByPostId(postId);
     }
 
     public Post findPostOrThrow(String postId) {

@@ -194,6 +194,18 @@ public class PostController {
         return ResponseEntity.ok(Map.of("message", "Comment deleted successfully", "commentId", commentId));
     }
 
+    @PutMapping("/api/posts/{postId}/comments/{commentId}")
+    public ResponseEntity<chat.model.PostComment> editComment(
+            @PathVariable String postId,
+            @PathVariable String commentId,
+            @Valid @RequestBody CreateCommentDto dto,
+            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+
+        ensureAuthenticated(userPrincipal);
+        chat.model.PostComment updated = postService.editComment(commentId, userPrincipal.getId(), dto.getContent());
+        return ResponseEntity.ok(updated);
+    }
+
     // ============================================================
     // BOOKMARKS / SAVED POSTS
     // ============================================================
@@ -235,13 +247,20 @@ public class PostController {
     }
 
     @PostMapping("/api/posts/{postId}/view")
-    public ResponseEntity<Void> trackView(
+    public ResponseEntity<Map<String, Long>> trackView(
             @PathVariable String postId,
             @AuthenticationPrincipal UserPrincipal userPrincipal) {
 
         String userId = userPrincipal != null ? userPrincipal.getId() : null;
-        postService.trackPostView(postId, userId);
-        return ResponseEntity.ok().build();
+        long count = postService.recordView(postId, userId);
+        return ResponseEntity.ok(Map.of("viewCount", count));
+    }
+
+    @GetMapping("/api/posts/{postId}/views/count")
+    public ResponseEntity<Map<String, Long>> getViewsCount(
+            @PathVariable String postId) {
+        long count = postService.getViewCount(postId);
+        return ResponseEntity.ok(Map.of("viewCount", count));
     }
 
     private void ensureAuthenticated(UserPrincipal userPrincipal) {

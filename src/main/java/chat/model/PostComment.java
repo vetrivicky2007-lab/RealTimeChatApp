@@ -31,9 +31,13 @@ public class PostComment {
     private Instant createdAt;
     private Instant updatedAt;
 
+    private String parentCommentId;
+    private boolean edited;
+
     public PostComment() {
         this.createdAt = Instant.now();
         this.updatedAt = Instant.now();
+        this.edited = false;
     }
 
     public PostComment(String postId, String communityId, String authorId, String authorUsername, String content) {
@@ -43,6 +47,22 @@ public class PostComment {
         this.authorId = authorId;
         this.authorUsername = authorUsername;
         this.content = content;
+    }
+
+    public String getParentCommentId() {
+        return parentCommentId;
+    }
+
+    public void setParentCommentId(String parentCommentId) {
+        this.parentCommentId = parentCommentId;
+    }
+
+    public boolean isEdited() {
+        return edited;
+    }
+
+    public void setEdited(boolean edited) {
+        this.edited = edited;
     }
 
     public String getId() {

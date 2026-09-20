@@ -274,6 +274,18 @@ document.addEventListener("DOMContentLoaded", () => {
     let currentTagFilter = "";
     let pendingPostFile = null;
 
+    // NEW: Chat Enhancement State
+    let lastRenderedMessage = null; // { senderId, timestamp } for message grouping
+    let lastRenderedDate = null; // For date separator tracking
+    let unreadWhileScrolledUp = 0; // Unread count when user scrolled up
+
+    // NEW: Comment Drawer State
+    let commentDrawerPostId = null;
+    let commentDrawerReplyTo = null; // { commentId, username } for reply-to tracking
+
+    // NEW: Notification State
+    let notifications = []; // In-memory notification array
+
     // Helper: authenticated REST fetch
     async function apiRequest(endpoint, options = {}) {
         const headers = {
@@ -344,6 +356,566 @@ document.addEventListener("DOMContentLoaded", () => {
                 setTimeout(() => toast.remove(), 250);
             }
         }, 4000);
+    }
+
+    // ============================================================
+    // SIDEBAR COLLAPSE TOGGLE
+    // ============================================================
+    const sidebarCollapseBtn = document.getElementById("sidebarCollapseBtn");
+    if (sidebarCollapseBtn) {
+        // Restore state from sessionStorage
+        if (sessionStorage.getItem("unihive_sidebar_collapsed") === "true") {
+            leftSidebar.classList.add("collapsed");
+        }
+        sidebarCollapseBtn.addEventListener("click", () => {
+            leftSidebar.classList.toggle("collapsed");
+            sessionStorage.setItem("unihive_sidebar_collapsed",
+                leftSidebar.classList.contains("collapsed") ? "true" : "false");
+        });
+    }
+
+    // ============================================================
+    // SKELETON LOADING HELPERS
+    // ============================================================
+    function renderSkeletonPostCards(count = 3) {
+        let html = "";
+        for (let i = 0; i < count; i++) {
+            html += `
+                <div class="skeleton-post-card">
+                    <div class="skeleton-post-header">
+                        <div class="skeleton skeleton-avatar"></div>
+                        <div style="flex: 1;">
+                            <div class="skeleton skeleton-line w-40 thick"></div>
+                            <div class="skeleton skeleton-line w-30"></div>
+                        </div>
+                    </div>
+                    <div class="skeleton skeleton-line w-80 thick"></div>
+                    <div class="skeleton skeleton-body-block"></div>
+                    <div class="skeleton-action-bar">
+                        <div class="skeleton skeleton-action"></div>
+                        <div class="skeleton skeleton-action"></div>
+                        <div class="skeleton skeleton-action"></div>
+                        <div class="skeleton skeleton-action"></div>
+                    </div>
+                </div>
+            `;
+        }
+        return html;
+    }
+
+    function renderSkeletonGroupItems(count = 5) {
+        let html = "";
+        for (let i = 0; i < count; i++) {
+            html += `
+                <div class="skeleton-group-item">
+                    <div class="skeleton skeleton-group-avatar"></div>
+                    <div class="skeleton-group-lines">
+                        <div class="skeleton skeleton-line w-60 thick"></div>
+                        <div class="skeleton skeleton-line w-40"></div>
+                    </div>
+                </div>
+            `;
+        }
+        return html;
+    }
+
+    function renderSkeletonComments(count = 3) {
+        let html = "";
+        for (let i = 0; i < count; i++) {
+            html += `
+                <div class="skeleton-comment">
+                    <div class="skeleton skeleton-comment-avatar"></div>
+                    <div class="skeleton-comment-body">
+                        <div class="skeleton skeleton-line w-30 thick"></div>
+                        <div class="skeleton skeleton-line w-80"></div>
+                        <div class="skeleton skeleton-line w-60"></div>
+                    </div>
+                </div>
+            `;
+        }
+        return html;
+    }
+
+    function removeSkeletons(container) {
+        if (!container) return;
+        container.querySelectorAll(".skeleton-post-card, .skeleton-group-item, .skeleton-comment").forEach(el => el.remove());
+    }
+
+    // ============================================================
+    // SCROLL-TO-BOTTOM BUTTON LOGIC
+    // ============================================================
+    const scrollToBottomBtn = document.getElementById("scrollToBottomBtn");
+    const scrollUnreadBadge = document.getElementById("scrollUnreadBadge");
+    const newMessagesIndicator = document.getElementById("newMessagesIndicator");
+    const chatStreamWrapper = document.querySelector(".chat-stream-wrapper");
+
+    function isNearBottom() {
+        if (!chatStreamWrapper) return true;
+        return chatStreamWrapper.scrollTop + chatStreamWrapper.clientHeight >= chatStreamWrapper.scrollHeight - 120;
+    }
+
+    function updateScrollButton() {
+        if (!scrollToBottomBtn || !chatStreamWrapper) return;
+        if (isNearBottom()) {
+            scrollToBottomBtn.classList.remove("visible");
+            scrollToBottomBtn.style.display = "none";
+            if (newMessagesIndicator) {
+                newMessagesIndicator.classList.remove("visible");
+                newMessagesIndicator.style.display = "none";
+            }
+            unreadWhileScrolledUp = 0;
+        } else {
+            scrollToBottomBtn.style.display = "flex";
+            scrollToBottomBtn.classList.add("visible");
+        }
+    }
+
+    if (chatStreamWrapper) {
+        chatStreamWrapper.addEventListener("scroll", updateScrollButton);
+    }
+
+    if (scrollToBottomBtn) {
+        scrollToBottomBtn.addEventListener("click", () => {
+            scrollMessagesToBottom();
+            unreadWhileScrolledUp = 0;
+            scrollToBottomBtn.classList.remove("visible");
+            scrollToBottomBtn.style.display = "none";
+            if (newMessagesIndicator) {
+                newMessagesIndicator.classList.remove("visible");
+                newMessagesIndicator.style.display = "none";
+            }
+            if (scrollUnreadBadge) {
+                scrollUnreadBadge.style.display = "none";
+            }
+        });
+    }
+
+    if (newMessagesIndicator) {
+        newMessagesIndicator.addEventListener("click", () => {
+            scrollMessagesToBottom();
+            unreadWhileScrolledUp = 0;
+            newMessagesIndicator.classList.remove("visible");
+            newMessagesIndicator.style.display = "none";
+            if (scrollToBottomBtn) {
+                scrollToBottomBtn.classList.remove("visible");
+                scrollToBottomBtn.style.display = "none";
+            }
+        });
+    }
+
+    // ============================================================
+    // NOTIFICATION BELL SYSTEM
+    // ============================================================
+    const notificationBellBtn = document.getElementById("notificationBellBtn");
+    const notificationBadge = document.getElementById("notificationBadge");
+    const notificationDropdown = document.getElementById("notificationDropdown");
+    const notificationList = document.getElementById("notificationList");
+    const clearNotificationsBtn = document.getElementById("clearNotificationsBtn");
+
+    function addNotification(text, type = "info") {
+        const notif = {
+            id: Date.now(),
+            text,
+            type,
+            time: new Date().toISOString(),
+            read: false
+        };
+        notifications.unshift(notif);
+        if (notifications.length > 50) notifications.pop();
+        updateNotificationBadge();
+        renderNotifications();
+    }
+
+    function updateNotificationBadge() {
+        const unread = notifications.filter(n => !n.read).length;
+        if (notificationBadge) {
+            if (unread > 0) {
+                notificationBadge.textContent = unread > 99 ? "99+" : unread;
+                notificationBadge.style.display = "flex";
+            } else {
+                notificationBadge.style.display = "none";
+            }
+        }
+    }
+
+    function renderNotifications() {
+        if (!notificationList) return;
+        if (notifications.length === 0) {
+            notificationList.innerHTML = '<div class="notification-empty">No notifications yet</div>';
+            return;
+        }
+        notificationList.innerHTML = notifications.slice(0, 20).map(notif => {
+            const timeAgo = formatRelativeTime(notif.time);
+            const iconSvg = notif.type === "post"
+                ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="9" x2="15" y2="9"></line><line x1="9" y1="13" x2="15" y2="13"></line></svg>'
+                : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path></svg>';
+            return `
+                <div class="notification-item" data-notif-id="${notif.id}">
+                    <div class="notification-item-icon">${iconSvg}</div>
+                    <div class="notification-item-content">
+                        <div class="notification-item-text">${escapeHtml(notif.text)}</div>
+                        <div class="notification-item-time">${timeAgo}</div>
+                    </div>
+                    <button class="notification-item-dismiss icon-btn" aria-label="Dismiss">&times;</button>
+                </div>
+            `;
+        }).join("");
+
+        notificationList.querySelectorAll(".notification-item-dismiss").forEach(btn => {
+            btn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                const item = btn.closest(".notification-item");
+                const id = parseInt(item.getAttribute("data-notif-id"));
+                notifications = notifications.filter(n => n.id !== id);
+                updateNotificationBadge();
+                renderNotifications();
+            });
+        });
+    }
+
+    if (notificationBellBtn) {
+        notificationBellBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            if (notificationDropdown) {
+                const isOpen = notificationDropdown.style.display !== "none";
+                notificationDropdown.style.display = isOpen ? "none" : "flex";
+                if (!isOpen) {
+                    notifications.forEach(n => n.read = true);
+                    updateNotificationBadge();
+                }
+            }
+        });
+    }
+
+    if (clearNotificationsBtn) {
+        clearNotificationsBtn.addEventListener("click", () => {
+            notifications = [];
+            updateNotificationBadge();
+            renderNotifications();
+        });
+    }
+
+    // Close notification dropdown on outside click
+    document.addEventListener("click", (e) => {
+        if (notificationDropdown && notificationDropdown.style.display !== "none") {
+            if (!notificationDropdown.contains(e.target) && e.target !== notificationBellBtn && !notificationBellBtn.contains(e.target)) {
+                notificationDropdown.style.display = "none";
+            }
+        }
+    });
+
+    // ============================================================
+    // COMMENT DRAWER MANAGEMENT
+    // ============================================================
+    const commentDrawerPanel = document.getElementById("commentDrawerPanel");
+    const commentDrawerBackdrop = document.getElementById("commentDrawerBackdrop");
+    const closeCommentDrawerBtn = document.getElementById("closeCommentDrawerBtn");
+    const drawerCommentsList = document.getElementById("drawerCommentsList");
+    const drawerCommentCount = document.getElementById("drawerCommentCount");
+    const drawerPostPreview = document.getElementById("drawerPostPreview");
+    const drawerCommentForm = document.getElementById("drawerCommentForm");
+    const drawerCommentInput = document.getElementById("drawerCommentInput");
+    const drawerCommentSubmitBtn = document.getElementById("drawerCommentSubmitBtn");
+    const drawerReplyIndicator = document.getElementById("drawerReplyIndicator");
+    const replyToUsername = document.getElementById("replyToUsername");
+    const cancelReplyBtn = document.getElementById("cancelReplyBtn");
+
+    function openCommentDrawer(postId, post) {
+        commentDrawerPostId = postId;
+        commentDrawerReplyTo = null;
+
+        // Set post preview
+        if (drawerPostPreview && post) {
+            drawerPostPreview.innerHTML = `
+                <div class="preview-title">${escapeHtml(post.title || post.content?.substring(0, 80) || "Post")}</div>
+                <div class="preview-author">by ${escapeHtml(post.authorUsername || "Unknown")} · ${formatRelativeTime(post.createdAt)}</div>
+            `;
+        }
+
+        // Show drawer
+        if (commentDrawerPanel) commentDrawerPanel.style.display = "flex";
+        if (commentDrawerBackdrop) commentDrawerBackdrop.style.display = "block";
+        if (drawerReplyIndicator) drawerReplyIndicator.style.display = "none";
+        if (drawerCommentInput) drawerCommentInput.focus();
+
+        // Load comments
+        loadCommentsInDrawer(postId);
+    }
+
+    function closeCommentDrawer() {
+        commentDrawerPostId = null;
+        commentDrawerReplyTo = null;
+        if (commentDrawerPanel) commentDrawerPanel.style.display = "none";
+        if (commentDrawerBackdrop) commentDrawerBackdrop.style.display = "none";
+        if (drawerReplyIndicator) drawerReplyIndicator.style.display = "none";
+        if (drawerCommentInput) drawerCommentInput.value = "";
+    }
+
+    if (closeCommentDrawerBtn) {
+        closeCommentDrawerBtn.addEventListener("click", closeCommentDrawer);
+    }
+    if (commentDrawerBackdrop) {
+        commentDrawerBackdrop.addEventListener("click", closeCommentDrawer);
+    }
+
+    function setReplyTo(commentId, username) {
+        commentDrawerReplyTo = { commentId, username };
+        if (drawerReplyIndicator) drawerReplyIndicator.style.display = "flex";
+        if (replyToUsername) replyToUsername.textContent = "@" + username;
+        if (drawerCommentInput) {
+            drawerCommentInput.focus();
+            drawerCommentInput.placeholder = `Reply to @${username}...`;
+        }
+    }
+
+    function clearReplyTo() {
+        commentDrawerReplyTo = null;
+        if (drawerReplyIndicator) drawerReplyIndicator.style.display = "none";
+        if (drawerCommentInput) drawerCommentInput.placeholder = "Write a comment...";
+    }
+
+    if (cancelReplyBtn) {
+        cancelReplyBtn.addEventListener("click", clearReplyTo);
+    }
+
+    async function loadCommentsInDrawer(postId) {
+        if (!drawerCommentsList) return;
+        drawerCommentsList.innerHTML = renderSkeletonComments(3);
+
+        try {
+            const res = await apiRequest(`/api/posts/${postId}/comments?page=0&size=100`);
+            if (!res || !res.ok) throw new Error("Failed to load comments");
+            const data = await res.json();
+            const comments = data.content || data || [];
+
+            if (drawerCommentCount) drawerCommentCount.textContent = comments.length;
+
+            if (comments.length === 0) {
+                drawerCommentsList.innerHTML = `
+                    <div class="empty-comments-state">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                        <p>No comments yet. Start the discussion!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Separate top-level and replies
+            const topLevel = comments.filter(c => !c.parentCommentId);
+            const replies = comments.filter(c => c.parentCommentId);
+            const replyMap = {};
+            replies.forEach(r => {
+                if (!replyMap[r.parentCommentId]) replyMap[r.parentCommentId] = [];
+                replyMap[r.parentCommentId].push(r);
+            });
+
+            let html = "";
+            topLevel.forEach(comment => {
+                html += renderDrawerComment(comment, postId);
+                // Render replies underneath
+                if (replyMap[comment.id]) {
+                    replyMap[comment.id].forEach(reply => {
+                        html += renderDrawerComment(reply, postId, true);
+                    });
+                }
+            });
+
+            drawerCommentsList.innerHTML = html;
+            attachCommentActions(postId);
+
+        } catch (err) {
+            console.error("Load comments error:", err);
+            drawerCommentsList.innerHTML = '<p class="error-note">Failed to load comments.</p>';
+        }
+    }
+
+    function renderDrawerComment(comment, postId, isReply = false) {
+        const initial = (comment.authorUsername || "U").charAt(0).toUpperCase();
+        const timeAgo = formatRelativeTime(comment.createdAt);
+        const isSelf = comment.authorId === currentUser.id;
+        const canDelete = comment.canDelete || isSelf;
+
+        return `
+            <div class="drawer-comment-row ${isReply ? 'reply-comment' : ''}" data-comment-id="${comment.id}">
+                <div class="drawer-comment-avatar">${initial}</div>
+                <div class="drawer-comment-body">
+                    <div class="drawer-comment-header">
+                        <span class="drawer-comment-author">${escapeHtml(comment.authorUsername)}</span>
+                        <span class="drawer-comment-time">${timeAgo}</span>
+                        ${comment.edited ? '<span class="drawer-comment-edited">(edited)</span>' : ''}
+                    </div>
+                    <div class="drawer-comment-text">${escapeHtml(comment.content)}</div>
+                    <div class="drawer-comment-actions">
+                        <button class="comment-action-btn btn-reply-comment" data-comment-id="${comment.id}" data-author="${escapeHtml(comment.authorUsername)}">
+                            ↩ Reply
+                        </button>
+                        ${isSelf ? `<button class="comment-action-btn btn-edit-comment" data-comment-id="${comment.id}">✎ Edit</button>` : ''}
+                        ${canDelete ? `<button class="comment-action-btn danger btn-delete-comment" data-comment-id="${comment.id}" data-post-id="${postId}">✕ Delete</button>` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function attachCommentActions(postId) {
+        if (!drawerCommentsList) return;
+
+        // Reply buttons
+        drawerCommentsList.querySelectorAll(".btn-reply-comment").forEach(btn => {
+            btn.addEventListener("click", () => {
+                setReplyTo(btn.getAttribute("data-comment-id"), btn.getAttribute("data-author"));
+            });
+        });
+
+        // Edit buttons
+        drawerCommentsList.querySelectorAll(".btn-edit-comment").forEach(btn => {
+            btn.addEventListener("click", async () => {
+                const commentId = btn.getAttribute("data-comment-id");
+                const row = btn.closest(".drawer-comment-row");
+                const textEl = row.querySelector(".drawer-comment-text");
+                const oldText = textEl.textContent;
+
+                // Inline edit mode
+                textEl.innerHTML = `<input type="text" class="comment-input inline-edit-input" value="${escapeHtml(oldText)}" maxlength="1000" style="width: 100%; font-size: 0.82rem;">`;
+                const input = textEl.querySelector("input");
+                input.focus();
+                input.select();
+
+                const saveEdit = async () => {
+                    const newText = input.value.trim();
+                    if (!newText || newText === oldText) {
+                        textEl.textContent = oldText;
+                        return;
+                    }
+                    try {
+                        const res = await apiRequest(`/api/posts/${postId}/comments/${commentId}`, {
+                            method: "PUT",
+                            body: JSON.stringify({ content: newText })
+                        });
+                        if (res && res.ok) {
+                            showToast("Comment updated.", "success");
+                            loadCommentsInDrawer(postId);
+                        } else {
+                            showToast("Failed to update comment.", "error");
+                            textEl.textContent = oldText;
+                        }
+                    } catch (err) {
+                        showToast("Network error.", "error");
+                        textEl.textContent = oldText;
+                    }
+                };
+
+                input.addEventListener("keydown", (e) => {
+                    if (e.key === "Enter") { e.preventDefault(); saveEdit(); }
+                    if (e.key === "Escape") { textEl.textContent = oldText; }
+                });
+                input.addEventListener("blur", saveEdit);
+            });
+        });
+
+        // Delete buttons
+        drawerCommentsList.querySelectorAll(".btn-delete-comment").forEach(btn => {
+            btn.addEventListener("click", async () => {
+                const commentId = btn.getAttribute("data-comment-id");
+                const postId = btn.getAttribute("data-post-id");
+
+                showConfirmDialog("Delete Comment", "Are you sure you want to delete this comment?", async () => {
+                    try {
+                        const res = await apiRequest(`/api/posts/${postId}/comments/${commentId}`, {
+                            method: "DELETE"
+                        });
+                        if (res && res.ok) {
+                            showToast("Comment deleted.", "success");
+                            loadCommentsInDrawer(postId);
+                            // Update post card comment count
+                            const postCard = document.querySelector(`#post-card-${postId}`);
+                            if (postCard) {
+                                const countEl = postCard.querySelector(".comment-count");
+                                if (countEl) {
+                                    const c = Math.max(0, parseInt(countEl.textContent || "0") - 1);
+                                    countEl.textContent = c;
+                                }
+                            }
+                        } else {
+                            showToast("Failed to delete comment.", "error");
+                        }
+                    } catch (err) {
+                        showToast("Network error.", "error");
+                    }
+                });
+            });
+        });
+    }
+
+    // Comment drawer form submission
+    if (drawerCommentForm) {
+        drawerCommentForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            if (!commentDrawerPostId) return;
+            const text = drawerCommentInput.value.trim();
+            if (!text) return;
+            if (drawerCommentSubmitBtn) drawerCommentSubmitBtn.disabled = true;
+
+            try {
+                const body = { content: text };
+                if (commentDrawerReplyTo) {
+                    body.parentCommentId = commentDrawerReplyTo.commentId;
+                }
+
+                const res = await apiRequest(`/api/posts/${commentDrawerPostId}/comments`, {
+                    method: "POST",
+                    body: JSON.stringify(body)
+                });
+
+                if (res && res.ok) {
+                    drawerCommentInput.value = "";
+                    clearReplyTo();
+                    loadCommentsInDrawer(commentDrawerPostId);
+                    // Update post card comment count
+                    const postCard = document.querySelector(`#post-card-${commentDrawerPostId}`);
+                    if (postCard) {
+                        const countEl = postCard.querySelector(".comment-count");
+                        if (countEl) {
+                            countEl.textContent = parseInt(countEl.textContent || "0") + 1;
+                        }
+                    }
+                    showToast("Comment posted!", "success");
+                } else {
+                    const err = await res.json();
+                    showToast(err.error || "Failed to post comment.", "error");
+                }
+            } catch (err) {
+                console.error("Comment submit error:", err);
+                showToast("Network error.", "error");
+            } finally {
+                if (drawerCommentSubmitBtn) drawerCommentSubmitBtn.disabled = false;
+            }
+        });
+    }
+
+    // ============================================================
+    // DATE FORMATTING HELPER
+    // ============================================================
+    function getDateLabel(isoStr) {
+        const date = new Date(isoStr);
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const msgDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        const diff = today - msgDate;
+
+        if (diff === 0) return "Today";
+        if (diff === 86400000) return "Yesterday";
+
+        return date.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: date.getFullYear() !== now.getFullYear() ? "numeric" : undefined });
+    }
+
+    function createDateSeparator(label) {
+        const sep = document.createElement("div");
+        sep.className = "chat-date-separator";
+        sep.innerHTML = `<span class="chat-date-separator-text">${label}</span>`;
+        return sep;
     }
 
     // ============================================================
@@ -456,6 +1028,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 } else {
                     if (newPostsDot) newPostsDot.style.display = "block";
                 }
+                // Add to notification bell
+                const author = data.senderUsername || "Someone";
+                const title = data.title || "a new post";
+                addNotification(`${author} published "${title}" in ${currentGroup.name}`, "post");
             }
         }
         // 5. Server error notification
@@ -492,8 +1068,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // 5. DASHBOARD, TABS & GROUPS EXPLORATION
     // ============================================================
     async function loadGroups() {
-        groupsLoading.style.display = "flex";
-        groupsListContainer.style.display = "none";
+        groupsLoading.style.display = "none";
+        groupsListContainer.innerHTML = renderSkeletonGroupItems(5);
+        groupsListContainer.style.display = "block";
         noGroupsMessage.style.display = "none";
 
         try {
@@ -1273,6 +1850,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 const messages = await res.json();
                 messagesList.innerHTML = "";
                 displayedMessageIds.clear();
+                lastRenderedMessage = null;
+                lastRenderedDate = null;
+                unreadWhileScrolledUp = 0;
 
                 if (messages.length === 0) {
                     messagesList.innerHTML = `
@@ -1297,15 +1877,35 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    function appendMessage(msg, shouldScroll = true) {
+    function appendMessage(msg, isNewMsg = true) {
         const placeholder = messagesList.querySelector(".list-placeholder-state");
         if (placeholder) placeholder.remove();
 
         const mine = msg.senderId === currentUser.id || msg.senderUsername === currentUser.username;
         const timeStr = formatTimestamp(msg.timestamp);
+        
+        // 1. Date Separator Logic
+        const msgDateIso = new Date(msg.timestamp || Date.now()).toISOString();
+        const dateLabel = getDateLabel(msgDateIso);
+        if (dateLabel !== lastRenderedDate) {
+            messagesList.appendChild(createDateSeparator(dateLabel));
+            lastRenderedDate = dateLabel;
+            lastRenderedMessage = null; // Reset grouping after date change
+        }
+
+        // 2. Sender Grouping Logic (within 5 minutes)
+        let isGrouped = false;
+        const msgTimeMs = new Date(msg.timestamp || Date.now()).getTime();
+        
+        if (lastRenderedMessage) {
+            const timeDiff = msgTimeMs - lastRenderedMessage.timestamp;
+            if (lastRenderedMessage.senderId === msg.senderId && timeDiff < 300000) {
+                isGrouped = true;
+            }
+        }
 
         const row = document.createElement("div");
-        row.className = `message-row ${mine ? 'mine' : 'other'}`;
+        row.className = `message-row ${mine ? 'mine' : 'other'} ${isGrouped ? 'grouped' : 'group-first'}`;
 
         let mediaHtml = "";
         if (msg.mediaUrl) {
@@ -1317,8 +1917,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         row.innerHTML = `
+            ${!mine && !isGrouped ? `<div class="msg-avatar-spacer"></div>` : (isGrouped && !mine ? `<div class="msg-avatar-spacer"></div>` : '')}
             <div class="message-bubble">
-                ${!mine ? `<span class="message-sender">${escapeHtml(msg.senderUsername || 'Member')}</span>` : ''}
+                ${!mine && !isGrouped ? `<span class="message-sender">${escapeHtml(msg.senderUsername || 'Member')}</span>` : ''}
                 ${mediaHtml}
                 ${msg.content ? `<div class="message-text">${escapeHtml(msg.content)}</div>` : ''}
                 <div class="message-meta">
@@ -1333,17 +1934,46 @@ document.addEventListener("DOMContentLoaded", () => {
             imgEl.addEventListener("click", () => {
                 openLightbox(msg.mediaUrl);
             });
+            imgEl.addEventListener("load", () => {
+                if (isNewMsg && (mine || isNearBottom())) scrollMessagesToBottom();
+            });
         }
 
         messagesList.appendChild(row);
+        
+        lastRenderedMessage = {
+            senderId: msg.senderId,
+            timestamp: msgTimeMs
+        };
 
-        if (shouldScroll) {
-            scrollMessagesToBottom();
+        // 3. Smart Scrolling Logic
+        if (isNewMsg) {
+            if (mine || isNearBottom()) {
+                scrollMessagesToBottom();
+            } else {
+                unreadWhileScrolledUp++;
+                if (scrollUnreadBadge) {
+                    scrollUnreadBadge.textContent = unreadWhileScrolledUp > 99 ? "99+" : unreadWhileScrolledUp;
+                    scrollUnreadBadge.style.display = "flex";
+                }
+                if (newMessagesIndicator) {
+                    newMessagesIndicator.classList.add("visible");
+                    newMessagesIndicator.style.display = "flex";
+                    const newMsgCount = document.getElementById("newMsgCount");
+                    if (newMsgCount) {
+                        newMsgCount.textContent = unreadWhileScrolledUp === 1 ? "1 new message" : `${unreadWhileScrolledUp} new messages`;
+                    }
+                }
+            }
         }
     }
 
     function scrollMessagesToBottom() {
-        messagesList.scrollTop = messagesList.scrollHeight;
+        if (chatStreamWrapper) {
+            chatStreamWrapper.scrollTop = chatStreamWrapper.scrollHeight;
+        } else {
+            messagesList.scrollTop = messagesList.scrollHeight;
+        }
     }
 
     function formatTimestamp(isoStr) {
@@ -1576,6 +2206,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (postsLoadingIndicator) postsLoadingIndicator.style.display = "flex";
 
+        if (!append) {
+            postsFeedContainer.innerHTML = renderSkeletonPostCards(3);
+            postsFeedContainer.style.display = "flex";
+            postsEmptyState.style.display = "none";
+        }
+
         try {
             let url = `/api/communities/${currentGroup.id}/posts?page=${page}&size=20`;
             if (currentCategoryFilter && currentCategoryFilter !== "ALL") {
@@ -1600,6 +2236,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     postsFeedContainer.innerHTML = "";
                 } else {
                     postsList = postsList.concat(fetchedPosts);
+                    removeSkeletons(postsFeedContainer);
                 }
 
                 if (postsList.length === 0) {
@@ -1845,17 +2482,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     </button>
                 </div>
             </div>
-
-            <div class="post-comments-section" id="comments-section-${post.id}" style="display: none;">
-                <div class="comments-list-container" id="comments-list-${post.id}">
-                    <div class="loading-spinner small-spinner"></div>
-                </div>
-
-                <form class="comment-composer-form" data-post-id="${post.id}">
-                    <input type="text" class="comment-input" placeholder="Write a comment..." maxlength="1000" autocomplete="off" required>
-                    <button type="submit" class="comment-submit-btn">Comment</button>
-                </form>
-            </div>
         `;
 
         // Tag Clicks
@@ -1964,52 +2590,15 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const commentsToggleBtn = card.querySelector(".btn-post-comments");
-        const commentsSection = card.querySelector(`#comments-section-${post.id}`);
-        if (commentsToggleBtn && commentsSection) {
+        if (commentsToggleBtn) {
             commentsToggleBtn.addEventListener("click", () => {
-                const isHidden = commentsSection.style.display === "none";
-                commentsSection.style.display = isHidden ? "block" : "none";
-                if (isHidden) {
-                    loadPostComments(post.id);
-                }
+                openCommentDrawer(post.id, post);
+                // Also asynchronously record a view since they're engaging with the post
+                apiRequest(`/api/posts/${post.id}/view`, { method: "POST" }).catch(() => {});
             });
         }
 
-        const commentForm = card.querySelector(`.comment-composer-form[data-post-id="${post.id}"]`);
-        if (commentForm) {
-            commentForm.addEventListener("submit", async (e) => {
-                e.preventDefault();
-                const input = commentForm.querySelector(".comment-input");
-                const text = input.value.trim();
-                if (!text) return;
 
-                const submitBtn = commentForm.querySelector(".comment-submit-btn");
-                submitBtn.disabled = true;
-
-                try {
-                    const res = await apiRequest(`/api/posts/${post.id}/comments`, {
-                        method: "POST",
-                        body: JSON.stringify({ content: text })
-                    });
-
-                    if (res && res.ok) {
-                        input.value = "";
-                        await loadPostComments(post.id);
-                        post.commentCount = (post.commentCount || 0) + 1;
-                        const countEl = card.querySelector(".comment-count");
-                        if (countEl) countEl.textContent = post.commentCount;
-                    } else {
-                        const err = await res.json();
-                        showToast(err.error || "Failed to post comment.", "error");
-                    }
-                } catch (err) {
-                    console.error("Comment submit error:", err);
-                    showToast("Network error submitting comment.", "error");
-                } finally {
-                    submitBtn.disabled = false;
-                }
-            });
-        }
 
         postsFeedContainer.appendChild(card);
     }
@@ -2190,74 +2779,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // ============================================================
-    // 19. POST COMMENTS WORKFLOW
-    // ============================================================
-    async function loadPostComments(postId) {
-        const listContainer = document.getElementById(`comments-list-${postId}`);
-        if (!listContainer) return;
-
-        try {
-            const res = await apiRequest(`/api/posts/${postId}/comments?page=0&size=50`);
-            if (res && res.ok) {
-                const data = await res.json();
-                const comments = data.content || [];
-                listContainer.innerHTML = "";
-
-                if (comments.length === 0) {
-                    listContainer.innerHTML = `<p class="empty-comments-note">No comments yet. Start the discussion!</p>`;
-                    return;
-                }
-
-                comments.forEach(comment => {
-                    const row = document.createElement("div");
-                    row.className = "comment-row";
-                    const initial = (comment.authorUsername || "U").charAt(0).toUpperCase();
-                    const isSelf = comment.authorId === currentUser.id;
-                    const canDelete = comment.canDelete || isSelf;
-
-                    row.innerHTML = `
-                        <div class="comment-avatar">${initial}</div>
-                        <div class="comment-content-box">
-                            <div class="comment-header-line">
-                                <strong class="comment-author">${escapeHtml(comment.authorUsername)}</strong>
-                                <span class="comment-time">${formatRelativeTime(comment.createdAt)}</span>
-                                ${canDelete ? `
-                                    <button type="button" class="btn-delete-comment" title="Delete comment" data-comment-id="${comment.id}">&times;</button>
-                                ` : ''}
-                            </div>
-                            <div class="comment-text">${escapeHtml(comment.content)}</div>
-                        </div>
-                    `;
-
-                    const delBtn = row.querySelector(".btn-delete-comment");
-                    if (delBtn) {
-                        delBtn.addEventListener("click", async () => {
-                            if (confirm("Delete this comment?")) {
-                                const delRes = await apiRequest(`/api/posts/${postId}/comments/${comment.id}`, {
-                                    method: "DELETE"
-                                });
-                                if (delRes && delRes.ok) {
-                                    await loadPostComments(postId);
-                                    const card = document.getElementById(`post-card-${postId}`);
-                                    if (card) {
-                                        const countEl = card.querySelector(".comment-count");
-                                        const currentVal = parseInt(countEl.textContent, 10) || 1;
-                                        countEl.textContent = Math.max(0, currentVal - 1);
-                                    }
-                                }
-                            }
-                        });
-                    }
-
-                    listContainer.appendChild(row);
-                });
-            }
-        } catch (e) {
-            console.error("Load comments error:", e);
-            listContainer.innerHTML = `<p class="error-note">Failed to load comments.</p>`;
-        }
-    }
 
     // ============================================================
     // 20. COMMUNITY VERIFICATION ASSESSMENT WORKFLOW

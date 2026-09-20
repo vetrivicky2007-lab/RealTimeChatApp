@@ -13,6 +13,8 @@ public class CommentResponseDto {
     private Instant createdAt;
     private Instant updatedAt;
     private boolean canDelete;
+    private String parentCommentId;
+    private boolean edited;
 
     public CommentResponseDto() {
     }
@@ -27,6 +29,12 @@ public class CommentResponseDto {
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.canDelete = canDelete;
+    }
+    
+    public CommentResponseDto(String id, String postId, String communityId, String authorId, String authorUsername, String content, Instant createdAt, Instant updatedAt, boolean canDelete, String parentCommentId, boolean edited) {
+        this(id, postId, communityId, authorId, authorUsername, content, createdAt, updatedAt, canDelete);
+        this.parentCommentId = parentCommentId;
+        this.edited = edited;
     }
 
     public String getId() {
@@ -99,5 +107,21 @@ public class CommentResponseDto {
 
     public void setCanDelete(boolean canDelete) {
         this.canDelete = canDelete;
+    }
+
+    public String getParentCommentId() {
+        return parentCommentId;
+    }
+
+    public void setParentCommentId(String parentCommentId) {
+        this.parentCommentId = parentCommentId;
+    }
+
+    public boolean isEdited() {
+        return edited;
+    }
+
+    public void setEdited(boolean edited) {
+        this.edited = edited;
     }
 }
