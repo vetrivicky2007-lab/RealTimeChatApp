@@ -5,34 +5,34 @@
    ========================================================================== */
 
 :root {
-    /* Color Palette - Deep Slate / Obsidian Theme */
-    --bg-base: #0a0e17;
-    --bg-sidebar: #0f1624;
-    --bg-chat: #0a0e17;
-    --bg-surface: #131b2c;
-    --bg-surface-elevated: #182236;
-    --bg-surface-hover: #1e2a44;
-    --bg-surface-active: #253454;
-    --bg-input: #0c121d;
+    /* Color Palette - Elegant Graphite Theme */
+    --bg-base: #0c0d10;
+    --bg-sidebar: #121418;
+    --bg-chat: #0c0d10;
+    --bg-surface: #181a1f;
+    --bg-surface-elevated: #1e2128;
+    --bg-surface-hover: #262932;
+    --bg-surface-active: #2e323d;
+    --bg-input: #08090b;
 
     /* Borders */
-    --border-subtle: rgba(255, 255, 255, 0.08);
-    --border-default: rgba(255, 255, 255, 0.14);
-    --border-hover: rgba(255, 255, 255, 0.24);
-    --border-focus: #6366f1;
+    --border-subtle: rgba(255, 255, 255, 0.05);
+    --border-default: rgba(255, 255, 255, 0.1);
+    --border-hover: rgba(255, 255, 255, 0.15);
+    --border-focus: #3b82f6;
 
     /* Typography */
-    --text-primary: #f8fafc;
-    --text-secondary: #94a3b8;
-    --text-muted: #64748b;
+    --text-primary: #f3f4f6;
+    --text-secondary: #9ca3af;
+    --text-muted: #6b7280;
     --text-inverse: #ffffff;
 
     /* Accent & Brand Colors */
-    --accent: #6366f1;
-    --accent-hover: #4f46e5;
-    --accent-subtle: rgba(99, 102, 241, 0.12);
-    --accent-glow: rgba(99, 102, 241, 0.25);
-    --accent-bubble: #4338ca;
+    --accent: #3b82f6;
+    --accent-hover: #2563eb;
+    --accent-subtle: rgba(59, 130, 246, 0.12);
+    --accent-glow: rgba(59, 130, 246, 0.25);
+    --accent-bubble: #2563eb;
 
     /* Status & Assessment */
     --status-online: #10b981;
@@ -1139,6 +1139,7 @@ body {
 
 .composer-form {
     display: flex;
+    flex-direction: row;
     align-items: flex-end;
     gap: 8px;
     background-color: var(--bg-input);
@@ -1853,6 +1854,7 @@ body {
 
 .comment-composer-form {
     display: flex;
+    flex-direction: row;
     align-items: center;
     gap: 8px;
     margin-top: 4px;
@@ -3709,6 +3711,7 @@ form {
 
 .comment-drawer-composer {
     display: flex;
+    flex-direction: row;
     align-items: center;
     gap: 8px;
     padding: 12px 16px;
