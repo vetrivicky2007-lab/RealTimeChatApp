@@ -22,6 +22,11 @@ public class WsAction {
     private Instant timestamp;
     private String status;
     private String messageType;
+    private String mediaUrl;
+
+    // Post notification fields
+    private String postId;
+    private String title;
 
     // Typing state
     private Boolean isTyping;
@@ -50,6 +55,10 @@ public class WsAction {
     }
 
     public static WsAction message(String messageId, String groupId, String senderId, String senderUsername, String content, Instant timestamp, String status) {
+        return message(messageId, groupId, senderId, senderUsername, content, timestamp, status, "TEXT", null);
+    }
+
+    public static WsAction message(String messageId, String groupId, String senderId, String senderUsername, String content, Instant timestamp, String status, String messageType, String mediaUrl) {
         WsAction action = new WsAction();
         action.setType("MESSAGE");
         action.setMessageId(messageId);
@@ -59,7 +68,19 @@ public class WsAction {
         action.setContent(content);
         action.setTimestamp(timestamp);
         action.setStatus(status != null ? status : "SENT");
-        action.setMessageType("TEXT");
+        action.setMessageType(messageType != null ? messageType : "TEXT");
+        action.setMediaUrl(mediaUrl);
+        return action;
+    }
+
+    public static WsAction postCreated(String communityId, String postId, String authorUsername, String title) {
+        WsAction action = new WsAction();
+        action.setType("POST_CREATED");
+        action.setGroupId(communityId);
+        action.setPostId(postId);
+        action.setSenderUsername(authorUsername);
+        action.setTitle(title);
+        action.setTimestamp(Instant.now());
         return action;
     }
 
@@ -199,5 +220,29 @@ public class WsAction {
 
     public void setError(String error) {
         this.error = error;
+    }
+
+    public String getMediaUrl() {
+        return mediaUrl;
+    }
+
+    public void setMediaUrl(String mediaUrl) {
+        this.mediaUrl = mediaUrl;
+    }
+
+    public String getPostId() {
+        return postId;
+    }
+
+    public void setPostId(String postId) {
+        this.postId = postId;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 }

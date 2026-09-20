@@ -11,3 +11,5 @@ services:
         generateValue: true
       - key: FRONTEND_URL
         value: "*"
+      - key: CLOUDINARY_URL
+        sync: false

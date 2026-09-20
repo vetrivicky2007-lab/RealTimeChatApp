@@ -19,7 +19,8 @@ public class Message {
     private String senderUsername;
     private String content;
     private Instant timestamp;
-    private String messageType; // "TEXT", "SYSTEM"
+    private String messageType; // "TEXT", "SYSTEM", "IMAGE"
+    private String mediaUrl;
     private String status = "SENT"; // "SENT", "DELIVERED", "READ"
     private String conversationType = "GROUP"; // "GROUP", "PRIVATE"
     private String recipientId; // For private 1-to-1 messaging extensibility
@@ -130,5 +131,13 @@ public class Message {
 
     public void setRecipientId(String recipientId) {
         this.recipientId = recipientId;
+    }
+
+    public String getMediaUrl() {
+        return mediaUrl;
+    }
+
+    public void setMediaUrl(String mediaUrl) {
+        this.mediaUrl = mediaUrl;
     }
 }

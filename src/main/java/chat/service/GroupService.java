@@ -350,6 +350,7 @@ public class GroupService {
         dto.setId(group.getId());
         dto.setName(group.getName());
         dto.setDescription(group.getDescription());
+        dto.setAvatarUrl(group.getAvatarUrl());
         dto.setPrivacy(group.getPrivacy() != null ? group.getPrivacy() : "PUBLIC");
         dto.setCreatedBy(group.getCreatedBy());
         dto.setCreatorUsername(creatorUsername != null ? creatorUsername : "Unknown");

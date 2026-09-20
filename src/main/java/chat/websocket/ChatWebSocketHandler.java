@@ -154,28 +154,28 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             groupId = user.currentGroupId;
         }
 
-        if (groupId == null) {
-            sendToSession(session, WsAction.error("No active group selected"));
-            return;
-        }
-
-        if (!groupService.isMember(groupId, user.userId)) {
-            sendToSession(session, WsAction.error("You are not a member of this group"));
-            return;
-        }
+        // Ensure this session is in groupRooms so it immediately receives room broadcasts
+        groupRooms.computeIfAbsent(groupId, k -> ConcurrentHashMap.newKeySet()).add(session);
+        user.currentGroupId = groupId;
 
         String content = action.getContent();
-        if (content == null || content.trim().isEmpty()) {
-            sendToSession(session, WsAction.error("Message content cannot be empty"));
+        String mediaUrl = action.getMediaUrl();
+        String messageType = action.getMessageType();
+        if (messageType == null || messageType.trim().isEmpty()) {
+            messageType = (mediaUrl != null && !mediaUrl.trim().isEmpty()) ? "IMAGE" : "TEXT";
+        }
+
+        if ((content == null || content.trim().isEmpty()) && (mediaUrl == null || mediaUrl.trim().isEmpty())) {
+            sendToSession(session, WsAction.error("Message content or image attachment cannot be empty"));
             return;
         }
 
         // 1. Assign ID and timestamp immediately in-memory
         String messageId = UUID.randomUUID().toString();
         Instant now = Instant.now();
-        String trimmedContent = content.trim();
+        String trimmedContent = content != null ? content.trim() : "";
 
-        // 2. Build structured message frame matching requirement 10
+        // 2. Build structured message frame matching requirement
         WsAction broadcastAction = WsAction.message(
                 messageId,
                 groupId,
@@ -183,7 +183,9 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
                 user.username,
                 trimmedContent,
                 now,
-                "SENT"
+                "SENT",
+                messageType,
+                mediaUrl
         );
 
         // 3. BROADCAST IMMEDIATELY to ALL active sessions in group room (including sender!)
@@ -193,6 +195,8 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         // 4. PERSIST ASYNCHRONOUSLY to MongoDB Atlas in the background
         // Slow cloud database latency never blocks real-time delivery!
         final String finalGroupId = groupId;
+        final String finalMessageType = messageType;
+        final String finalMediaUrl = mediaUrl;
         CompletableFuture.runAsync(() -> {
             try {
                 messageService.savePreGeneratedMessage(
@@ -202,7 +206,8 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
                         user.username,
                         trimmedContent,
                         now,
-                        "TEXT"
+                        finalMessageType,
+                        finalMediaUrl
                 );
             } catch (Exception e) {
                 logger.error("Async MongoDB persistence failed for message {}: {}", messageId, e.getMessage());
@@ -302,6 +307,11 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         } catch (Exception e) {
             logger.error("Error serializing group broadcast: {}", e.getMessage());
         }
+    }
+
+    public void broadcastPostCreated(String communityId, String postId, String authorUsername, String title) {
+        WsAction action = WsAction.postCreated(communityId, postId, authorUsername, title);
+        broadcastToGroup(communityId, action);
     }
 
     private void broadcastOnlineUsers(String groupId) {

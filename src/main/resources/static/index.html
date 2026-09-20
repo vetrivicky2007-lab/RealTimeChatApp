@@ -45,6 +45,12 @@
                                 <small id="menuUserEmail">Logged in</small>
                             </div>
                             <div class="dropdown-divider"></div>
+                            <button id="menuItemSavedPosts" class="dropdown-item">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                                </svg>
+                                Saved Posts
+                            </button>
                             <button id="logoutBtn" class="dropdown-item danger-item">
                                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
@@ -257,43 +263,163 @@
                     </div>
                 </header>
 
-                <!-- Messages Stream Area -->
-                <div class="chat-stream-wrapper">
-                    <div id="messagesList" class="messages-stream">
-                        <!-- Loaded history and live messages populate here -->
+                <!-- Community Navigation Tabs -->
+                <nav class="community-nav-tabs">
+                    <button id="tabGeneralChat" class="community-tab active" data-tab="chat">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                        <span>General Chat</span>
+                    </button>
+                    <button id="tabCommunityPosts" class="community-tab" data-tab="posts">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                        </svg>
+                        <span>Community Posts</span>
+                        <span id="newPostsDot" class="tab-notify-dot" style="display: none;"></span>
+                    </button>
+                </nav>
+
+                <!-- 1. GENERAL CHAT VIEW -->
+                <div id="chatViewContainer" class="community-tab-pane">
+                    <!-- Messages Stream Area -->
+                    <div class="chat-stream-wrapper">
+                        <div id="messagesList" class="messages-stream">
+                            <!-- Loaded history and live messages populate here -->
+                        </div>
+
+                        <!-- Typing Indicator -->
+                        <div id="typingIndicator" class="typing-notice" style="display: none;">
+                            <div class="typing-wave">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                            <span id="typingText" class="typing-label">User is typing...</span>
+                        </div>
                     </div>
 
-                    <!-- Typing Indicator -->
-                    <div id="typingIndicator" class="typing-notice" style="display: none;">
-                        <div class="typing-wave">
-                            <span></span>
-                            <span></span>
-                            <span></span>
+                    <!-- Message Composer -->
+                    <footer class="chat-composer-bar">
+                        <!-- Pending image preview strip -->
+                        <div id="chatImagePreviewBar" class="chat-image-preview-bar" style="display: none;">
+                            <div class="preview-thumb-wrapper">
+                                <img id="chatPreviewThumb" src="" alt="Image preview">
+                                <button type="button" id="removeChatImageBtn" class="remove-preview-btn" title="Remove attachment">&times;</button>
+                            </div>
+                            <span id="chatImageName" class="preview-filename">image.png</span>
                         </div>
-                        <span id="typingText" class="typing-label">User is typing...</span>
-                    </div>
+
+                        <form id="chatForm" class="composer-form">
+                            <input type="file" id="chatFileInput" accept="image/jpeg,image/png,image/webp,image/gif" style="display: none;">
+                            <button type="button" id="chatAttachBtn" class="icon-btn composer-attach-btn" title="Share an image" aria-label="Attach Image">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+                                </svg>
+                            </button>
+                            <div class="composer-input-container">
+                                <textarea
+                                    id="messageInput"
+                                    class="composer-textarea"
+                                    placeholder="Type a message..."
+                                    rows="1"
+                                    autocomplete="off"></textarea>
+                            </div>
+                            <button type="submit" id="sendMessageBtn" class="send-message-btn" title="Send Message" aria-label="Send">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                                </svg>
+                            </button>
+                        </form>
+                    </footer>
                 </div>
 
-                <!-- Message Composer -->
-                <footer class="chat-composer-bar">
-                    <form id="chatForm" class="composer-form">
-                        <div class="composer-input-container">
-                            <textarea
-                                id="messageInput"
-                                class="composer-textarea"
-                                placeholder="Type a message..."
-                                rows="1"
-                                autocomplete="off"
-                                required></textarea>
+                <!-- 2. COMMUNITY POSTS VIEW -->
+                <div id="postsViewContainer" class="community-tab-pane" style="display: none;">
+                    <!-- Posts Action & Filter Bar -->
+                    <div class="posts-action-bar">
+                        <div class="posts-action-left">
+                            <button id="openCreatePostModalBtn" class="action-btn primary-action-btn create-post-trigger-btn">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                                <span>Create Post</span>
+                            </button>
+
+                            <div class="category-filter-select-wrapper">
+                                <select id="postCategoryFilter" class="category-select" aria-label="Filter by Category">
+                                    <option value="ALL">All Categories</option>
+                                    <option value="Technology">Technology</option>
+                                    <option value="Programming">Programming</option>
+                                    <option value="AI">AI</option>
+                                    <option value="Machine Learning">Machine Learning</option>
+                                    <option value="News">News</option>
+                                    <option value="Research">Research</option>
+                                    <option value="Events">Events</option>
+                                    <option value="Resources">Resources</option>
+                                    <option value="Announcements">Announcements</option>
+                                    <option value="Projects">Projects</option>
+                                    <option value="General">General</option>
+                                </select>
+                            </div>
                         </div>
-                        <button type="submit" id="sendMessageBtn" class="send-message-btn" title="Send Message" aria-label="Send">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <line x1="22" y1="2" x2="11" y2="13"></line>
-                                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                            </svg>
-                        </button>
-                    </form>
-                </footer>
+
+                        <div class="posts-action-right">
+                            <div id="activeTagFilterPill" class="active-tag-chip" style="display: none;">
+                                <span id="activeTagName">#tag</span>
+                                <button id="clearTagFilterBtn" title="Clear tag filter">&times;</button>
+                            </div>
+
+                            <button id="refreshPostsBtn" class="icon-btn" title="Refresh feed" aria-label="Refresh">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="23 4 23 10 17 10"></polyline>
+                                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- New Posts Available Toast Banner -->
+                    <div id="newPostsBanner" class="new-posts-banner" style="display: none;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="19" x2="12" y2="5"></line>
+                            <polyline points="5 12 12 5 19 12"></polyline>
+                        </svg>
+                        <span>New posts available · <strong>Click to view</strong></span>
+                    </div>
+
+                    <!-- Posts Scroll Stream -->
+                    <div id="postsScrollStream" class="posts-scroll-stream">
+                        <!-- Feed Empty State -->
+                        <div id="postsEmptyState" class="posts-empty-state" style="display: none;">
+                            <div class="empty-feed-icon">
+                                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                    <line x1="9" y1="9" x2="15" y2="9"></line>
+                                    <line x1="9" y1="13" x2="15" y2="13"></line>
+                                    <line x1="9" y1="17" x2="13" y2="17"></line>
+                                </svg>
+                            </div>
+                            <h3>No posts yet</h3>
+                            <p>Be the first member to share something with the community.</p>
+                            <button id="emptyStateCreatePostBtn" class="primary-btn small-btn">Create Post</button>
+                        </div>
+
+                        <!-- Posts Feed List -->
+                        <div id="postsFeedContainer" class="posts-feed-container"></div>
+
+                        <!-- Infinite Scroll Loading Sentinel -->
+                        <div id="postsLoadingIndicator" class="posts-loading-sentinel" style="display: none;">
+                            <div class="loading-spinner"></div>
+                            <span>Loading more posts...</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </main>
 
@@ -515,6 +641,365 @@
                 <button type="button" id="cancelConfirmModalBtn" class="secondary-btn">Cancel</button>
                 <button type="button" id="proceedConfirmModalBtn" class="danger-btn">Confirm</button>
             </div>
+        </div>
+    </div>
+
+    <!-- CREATE POST MODAL -->
+    <div id="createPostModal" class="modal-backdrop" style="display: none;">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h3>Create a Post</h3>
+                <button id="closeCreatePostModalBtn" class="icon-btn modal-close-btn" aria-label="Close">&times;</button>
+            </div>
+
+            <div id="createPostError" class="modal-alert-banner" style="display: none;"></div>
+
+            <form id="createPostForm">
+                <div class="form-field">
+                    <label for="postTitleInput">Title <span class="label-sub">(optional)</span></label>
+                    <input
+                        type="text"
+                        id="postTitleInput"
+                        placeholder="e.g. Understanding Attention Mechanisms in Transformers"
+                        maxlength="150">
+                </div>
+
+                <div class="form-field">
+                    <label for="postContentInput">What's happening? <span class="label-sub">(description)</span></label>
+                    <textarea
+                        id="postContentInput"
+                        rows="4"
+                        placeholder="Share useful discoveries, announcements, questions, or resources with your community..."
+                        maxlength="5000"></textarea>
+                </div>
+
+                <!-- Image Attachment Area with Cloudinary Preview -->
+                <div class="form-field">
+                    <label>Image Attachment <span class="label-sub">(optional, Cloudinary)</span></label>
+                    <div id="postImageUploadZone" class="image-upload-zone">
+                        <input type="file" id="postImageFileInput" accept="image/jpeg,image/png,image/webp,image/gif" style="display: none;">
+                        <div id="postImagePlaceholder" class="upload-zone-placeholder">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                <polyline points="21 15 16 10 5 21"></polyline>
+                            </svg>
+                            <span>Click or drag image here to attach (Max 10MB)</span>
+                        </div>
+                        <div id="postImagePreviewContainer" class="upload-zone-preview" style="display: none;">
+                            <img id="postImagePreviewImg" src="" alt="Post image preview">
+                            <button type="button" id="removePostImageBtn" class="remove-zone-img-btn" title="Remove image">&times;</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-field">
+                    <label for="postLinkInput">External Link <span class="label-sub">(optional, https://...)</span></label>
+                    <input
+                        type="url"
+                        id="postLinkInput"
+                        placeholder="https://example.com/article"
+                        maxlength="500">
+                </div>
+
+                <div class="form-row-grid">
+                    <div class="form-field">
+                        <label for="postCategoryInput">Category</label>
+                        <select id="postCategoryInput" class="category-select">
+                            <option value="General">General</option>
+                            <option value="Technology">Technology</option>
+                            <option value="Programming">Programming</option>
+                            <option value="AI">AI</option>
+                            <option value="Machine Learning">Machine Learning</option>
+                            <option value="News">News</option>
+                            <option value="Research">Research</option>
+                            <option value="Events">Events</option>
+                            <option value="Resources">Resources</option>
+                            <option value="Announcements">Announcements</option>
+                            <option value="Projects">Projects</option>
+                        </select>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="postTagsInput">Tags <span class="label-sub">(e.g. #AI #ML)</span></label>
+                        <input
+                            type="text"
+                            id="postTagsInput"
+                            placeholder="#MachineLearning #AI"
+                            maxlength="200">
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" id="cancelCreatePostBtn" class="secondary-btn">Cancel</button>
+                    <button type="submit" id="submitCreatePostBtn" class="primary-btn">Publish Post</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- EDIT POST MODAL -->
+    <div id="editPostModal" class="modal-backdrop" style="display: none;">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h3>Edit Post</h3>
+                <button id="closeEditPostModalBtn" class="icon-btn modal-close-btn" aria-label="Close">&times;</button>
+            </div>
+
+            <div id="editPostError" class="modal-alert-banner" style="display: none;"></div>
+
+            <form id="editPostForm">
+                <input type="hidden" id="editPostId" value="">
+
+                <div class="form-field">
+                    <label for="editPostTitleInput">Title</label>
+                    <input type="text" id="editPostTitleInput" maxlength="150">
+                </div>
+
+                <div class="form-field">
+                    <label for="editPostContentInput">Content</label>
+                    <textarea id="editPostContentInput" rows="4" maxlength="5000"></textarea>
+                </div>
+
+                <div class="form-field">
+                    <label for="editPostLinkInput">External Link</label>
+                    <input type="url" id="editPostLinkInput" maxlength="500">
+                </div>
+
+                <div class="form-row-grid">
+                    <div class="form-field">
+                        <label for="editPostCategoryInput">Category</label>
+                        <select id="editPostCategoryInput" class="category-select">
+                            <option value="General">General</option>
+                            <option value="Technology">Technology</option>
+                            <option value="Programming">Programming</option>
+                            <option value="AI">AI</option>
+                            <option value="Machine Learning">Machine Learning</option>
+                            <option value="News">News</option>
+                            <option value="Research">Research</option>
+                            <option value="Events">Events</option>
+                            <option value="Resources">Resources</option>
+                            <option value="Announcements">Announcements</option>
+                            <option value="Projects">Projects</option>
+                        </select>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="editPostTagsInput">Tags</label>
+                        <input type="text" id="editPostTagsInput" maxlength="200">
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" id="cancelEditPostBtn" class="secondary-btn">Cancel</button>
+                    <button type="submit" id="submitEditPostBtn" class="primary-btn">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- COMMUNITY VERIFICATION ASSESSMENT MODAL -->
+    <div id="verificationModal" class="modal-backdrop" style="display: none;">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h3>Community Verification</h3>
+                <button id="closeVerificationModalBtn" class="icon-btn modal-close-btn" aria-label="Close">&times;</button>
+            </div>
+
+            <div id="verificationModalError" class="modal-alert-banner" style="display: none;"></div>
+
+            <div class="verification-modal-intro">
+                <p>Help the community assess whether this shared information appears verified or unverified. UniHive aggregates member assessments to promote credible knowledge.</p>
+            </div>
+
+            <form id="verificationForm">
+                <input type="hidden" id="verifyPostId" value="">
+
+                <div class="form-field">
+                    <label>Your Assessment</label>
+                    <div class="verification-choice-grid">
+                        <label class="verify-choice-card verify-true">
+                            <input type="radio" name="verificationVerdict" value="VERIFIED" checked>
+                            <div class="choice-content">
+                                <span class="choice-icon">✓</span>
+                                <strong>Verified / True</strong>
+                                <small>Appears credible based on evidence or knowledge</small>
+                            </div>
+                        </label>
+
+                        <label class="verify-choice-card verify-false">
+                            <input type="radio" name="verificationVerdict" value="NOT_VERIFIED">
+                            <div class="choice-content">
+                                <span class="choice-icon">✕</span>
+                                <strong>Not Verified / False</strong>
+                                <small>Appears misleading, incorrect, or unsubstantiated</small>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-field">
+                    <label for="verifyReasonInput">Why? <span class="label-sub">(explanation / context)</span></label>
+                    <textarea
+                        id="verifyReasonInput"
+                        rows="3"
+                        placeholder="I checked the official docs / I have verified this research paper..."
+                        maxlength="1000"></textarea>
+                </div>
+
+                <div class="form-field">
+                    <label for="verifyEvidenceLinkInput">Evidence Link <span class="label-sub">(optional source URL)</span></label>
+                    <input
+                        type="url"
+                        id="verifyEvidenceLinkInput"
+                        placeholder="https://..."
+                        maxlength="1000">
+                </div>
+
+                <div class="modal-footer space-between">
+                    <button type="button" id="removeVerificationVoteBtn" class="danger-btn-outline small-btn" style="display: none;">Remove Vote</button>
+                    <div class="modal-footer-actions">
+                        <button type="button" id="cancelVerificationModalBtn" class="secondary-btn">Cancel</button>
+                        <button type="submit" id="submitVerificationBtn" class="primary-btn">Submit Assessment</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- VERIFICATION DETAILS MODAL -->
+    <div id="verificationDetailsModal" class="modal-backdrop" style="display: none;">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h3>Community Verification Breakdown</h3>
+                <button id="closeVerificationDetailsBtn" class="icon-btn modal-close-btn" aria-label="Close">&times;</button>
+            </div>
+
+            <div class="modal-body-scrollable">
+                <div class="verification-breakdown-card">
+                    <div class="breakdown-stat-row">
+                        <div class="breakdown-stat verified-stat">
+                            <span class="stat-symbol">✓</span>
+                            <div class="stat-meta">
+                                <span class="stat-number" id="detailVerifiedCount">0</span>
+                                <span class="stat-label">Verified (<span id="detailVerifiedPct">0%</span>)</span>
+                            </div>
+                        </div>
+
+                        <div class="breakdown-stat unverified-stat">
+                            <span class="stat-symbol">✕</span>
+                            <div class="stat-meta">
+                                <span class="stat-number" id="detailNotVerifiedCount">0</span>
+                                <span class="stat-label">Not Verified (<span id="detailNotVerifiedPct">0%</span>)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="verification-progress-track">
+                        <div id="detailProgressBar" class="verification-progress-fill" style="width: 0%;"></div>
+                    </div>
+                    <small class="breakdown-note" id="detailTotalVotesNote">0 members reviewed this post.</small>
+                </div>
+
+                <h4 class="sub-heading">Member Assessments & Evidence</h4>
+                <div id="verificationEvidenceList" class="evidence-items-list">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" id="closeVerificationDetailsFooterBtn" class="primary-btn">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- REPORT POST MODAL -->
+    <div id="reportPostModal" class="modal-backdrop" style="display: none;">
+        <div class="modal-dialog small-dialog">
+            <div class="modal-header">
+                <h3>Report Post</h3>
+                <button id="closeReportPostModalBtn" class="icon-btn modal-close-btn" aria-label="Close">&times;</button>
+            </div>
+
+            <div id="reportPostError" class="modal-alert-banner" style="display: none;"></div>
+
+            <form id="reportPostForm">
+                <input type="hidden" id="reportPostId" value="">
+
+                <div class="form-field">
+                    <label for="reportReasonSelect">Reason</label>
+                    <select id="reportReasonSelect" class="category-select" required>
+                        <option value="False/misleading information">False or misleading information</option>
+                        <option value="Spam">Spam or unwanted advertising</option>
+                        <option value="Harassment">Harassment or hate speech</option>
+                        <option value="Inappropriate content">Inappropriate or offensive content</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div class="form-field">
+                    <label for="reportDetailsInput">Additional Details <span class="label-sub">(optional)</span></label>
+                    <textarea id="reportDetailsInput" rows="3" placeholder="Provide extra context for community moderators..." maxlength="1000"></textarea>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" id="cancelReportPostBtn" class="secondary-btn">Cancel</button>
+                    <button type="submit" id="submitReportPostBtn" class="danger-btn">Submit Report</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- SAVED POSTS MODAL -->
+    <div id="savedPostsModal" class="modal-backdrop" style="display: none;">
+        <div class="modal-dialog large-dialog">
+            <div class="modal-header">
+                <div class="modal-title-with-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    <h3>Saved Posts</h3>
+                </div>
+                <button id="closeSavedPostsModalBtn" class="icon-btn modal-close-btn" aria-label="Close">&times;</button>
+            </div>
+
+            <div class="modal-body-scrollable">
+                <div id="savedPostsLoading" class="list-placeholder-state" style="display: none;">
+                    <div class="loading-spinner"></div>
+                    <span>Loading saved posts...</span>
+                </div>
+
+                <div id="savedPostsEmpty" class="posts-empty-state" style="display: none;">
+                    <p>You haven't bookmarked any posts yet. Use the <strong>Save</strong> option on any post to bookmark it here.</p>
+                </div>
+
+                <div id="savedPostsList" class="saved-posts-container">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- IMAGE LIGHTBOX MODAL -->
+    <div id="imageLightboxModal" class="lightbox-backdrop" style="display: none;">
+        <div class="lightbox-toolbar">
+            <a id="downloadLightboxBtn" class="lightbox-btn" title="Download image" download="unihive-image.jpg" target="_blank">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                <span>Download</span>
+            </a>
+            <button id="closeLightboxBtn" class="lightbox-btn" title="Close (Esc)" aria-label="Close">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="lightbox-content-wrapper">
+            <img id="lightboxImage" src="" alt="Fullscreen image">
         </div>
     </div>
 

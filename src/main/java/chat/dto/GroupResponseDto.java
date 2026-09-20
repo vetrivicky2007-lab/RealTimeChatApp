@@ -8,6 +8,7 @@ public class GroupResponseDto {
     private String id;
     private String name;
     private String description;
+    private String avatarUrl;
     private String privacy = "PUBLIC"; // "PUBLIC" or "PRIVATE"
     private String inviteCode;
     private String createdBy;
@@ -142,5 +143,13 @@ public class GroupResponseDto {
 
     public void setPendingRequestCount(int pendingRequestCount) {
         this.pendingRequestCount = pendingRequestCount;
+    }
+
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
     }
 }

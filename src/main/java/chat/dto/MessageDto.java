@@ -11,6 +11,7 @@ public class MessageDto {
     private String content;
     private Instant timestamp;
     private String messageType;
+    private String mediaUrl;
     private String status = "SENT";
     private String conversationType = "GROUP";
 
@@ -30,6 +31,10 @@ public class MessageDto {
     }
 
     public MessageDto(String id, String groupId, String senderId, String senderUsername, String content, Instant timestamp, String messageType, String status) {
+        this(id, groupId, senderId, senderUsername, content, timestamp, messageType, null, status);
+    }
+
+    public MessageDto(String id, String groupId, String senderId, String senderUsername, String content, Instant timestamp, String messageType, String mediaUrl, String status) {
         this.id = id;
         this.groupId = groupId;
         this.senderId = senderId;
@@ -37,6 +42,7 @@ public class MessageDto {
         this.content = content;
         this.timestamp = timestamp;
         this.messageType = messageType;
+        this.mediaUrl = mediaUrl;
         this.status = status;
         this.conversationType = "GROUP";
     }
@@ -111,5 +117,13 @@ public class MessageDto {
 
     public void setConversationType(String conversationType) {
         this.conversationType = conversationType;
+    }
+
+    public String getMediaUrl() {
+        return mediaUrl;
+    }
+
+    public void setMediaUrl(String mediaUrl) {
+        this.mediaUrl = mediaUrl;
     }
 }

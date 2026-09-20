@@ -55,8 +55,20 @@ public class MessageService {
             String content,
             Instant timestamp,
             String messageType) {
+        return savePreGeneratedMessage(messageId, groupId, senderId, senderUsername, content, timestamp, messageType, null);
+    }
 
-        if (content == null || content.trim().isEmpty()) {
+    public MessageDto savePreGeneratedMessage(
+            String messageId,
+            String groupId,
+            String senderId,
+            String senderUsername,
+            String content,
+            Instant timestamp,
+            String messageType,
+            String mediaUrl) {
+
+        if ((content == null || content.trim().isEmpty()) && (mediaUrl == null || mediaUrl.trim().isEmpty())) {
             return null;
         }
 
@@ -65,11 +77,12 @@ public class MessageService {
                 groupId,
                 senderId,
                 senderUsername,
-                content.trim(),
+                content != null ? content.trim() : "",
                 timestamp != null ? timestamp : Instant.now(),
                 messageType != null ? messageType : "TEXT",
                 "SENT"
         );
+        message.setMediaUrl(mediaUrl);
 
         Message saved = messageRepository.save(message);
         return toDto(saved);
@@ -97,6 +110,7 @@ public class MessageService {
                 message.getContent(),
                 message.getTimestamp(),
                 message.getMessageType(),
+                message.getMediaUrl(),
                 message.getStatus() != null ? message.getStatus() : "SENT"
         );
     }

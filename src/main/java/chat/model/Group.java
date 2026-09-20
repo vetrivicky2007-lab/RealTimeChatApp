@@ -16,6 +16,7 @@ public class Group {
 
     private String name;
     private String description;
+    private String avatarUrl;
     private String privacy = "PUBLIC"; // "PUBLIC" or "PRIVATE"
 
     @Indexed(sparse = true)
@@ -158,5 +159,13 @@ public class Group {
 
     public void setMemberCount(int memberCount) {
         this.memberCount = memberCount;
+    }
+
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
     }
 }

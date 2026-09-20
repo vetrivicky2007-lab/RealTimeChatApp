@@ -37,6 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const leftSidebar = document.getElementById("leftSidebar");
     const userMenuBtn = document.getElementById("userMenuBtn");
     const userDropdownMenu = document.getElementById("userDropdownMenu");
+    const menuItemSavedPosts = document.getElementById("menuItemSavedPosts");
     const logoutBtn = document.getElementById("logoutBtn");
     const openCreateModalBtn = document.getElementById("openCreateModalBtn");
     const openJoinPrivateModalBtn = document.getElementById("openJoinPrivateModalBtn");
@@ -52,7 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const noGroupsMessage = document.getElementById("noGroupsMessage");
     const emptyStateText = document.getElementById("emptyStateText");
 
-    // Main Chat Pane
+    // Main Chat Pane & Header
     const chatMainPane = document.getElementById("chatMainPane");
     const noChatSelectedState = document.getElementById("noChatSelectedState");
     const activeChatView = document.getElementById("activeChatView");
@@ -78,13 +79,40 @@ document.addEventListener("DOMContentLoaded", () => {
     const menuItemLeave = document.getElementById("menuItemLeave");
     const menuItemDelete = document.getElementById("menuItemDelete");
 
+    // Community Spaces Navigation Tabs
+    const tabGeneralChat = document.getElementById("tabGeneralChat");
+    const tabCommunityPosts = document.getElementById("tabCommunityPosts");
+    const newPostsDot = document.getElementById("newPostsDot");
+    const chatViewContainer = document.getElementById("chatViewContainer");
+    const postsViewContainer = document.getElementById("postsViewContainer");
+
     // Chat Conversation & Composer
     const messagesList = document.getElementById("messagesList");
     const typingIndicator = document.getElementById("typingIndicator");
     const typingText = document.getElementById("typingText");
+    const chatImagePreviewBar = document.getElementById("chatImagePreviewBar");
+    const chatPreviewThumb = document.getElementById("chatPreviewThumb");
+    const chatImageName = document.getElementById("chatImageName");
+    const removeChatImageBtn = document.getElementById("removeChatImageBtn");
     const chatForm = document.getElementById("chatForm");
+    const chatFileInput = document.getElementById("chatFileInput");
+    const chatAttachBtn = document.getElementById("chatAttachBtn");
     const messageInput = document.getElementById("messageInput");
     const sendMessageBtn = document.getElementById("sendMessageBtn");
+
+    // Community Posts Feed Controls
+    const openCreatePostModalBtn = document.getElementById("openCreatePostModalBtn");
+    const emptyStateCreatePostBtn = document.getElementById("emptyStateCreatePostBtn");
+    const postCategoryFilter = document.getElementById("postCategoryFilter");
+    const activeTagFilterPill = document.getElementById("activeTagFilterPill");
+    const activeTagName = document.getElementById("activeTagName");
+    const clearTagFilterBtn = document.getElementById("clearTagFilterBtn");
+    const refreshPostsBtn = document.getElementById("refreshPostsBtn");
+    const newPostsBanner = document.getElementById("newPostsBanner");
+    const postsScrollStream = document.getElementById("postsScrollStream");
+    const postsEmptyState = document.getElementById("postsEmptyState");
+    const postsFeedContainer = document.getElementById("postsFeedContainer");
+    const postsLoadingIndicator = document.getElementById("postsLoadingIndicator");
 
     // Right Info Drawer
     const rightInfoDrawer = document.getElementById("rightInfoDrawer");
@@ -106,7 +134,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const drawerLeaveBtn = document.getElementById("drawerLeaveBtn");
     const drawerDeleteBtn = document.getElementById("drawerDeleteBtn");
 
-    // Modals
+    // Modals: Create Group
     const createGroupModal = document.getElementById("createGroupModal");
     const closeCreateModalBtn = document.getElementById("closeCreateModalBtn");
     const cancelCreateModalBtn = document.getElementById("cancelCreateModalBtn");
@@ -116,6 +144,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const newGroupDesc = document.getElementById("newGroupDesc");
     const submitCreateGroupBtn = document.getElementById("submitCreateGroupBtn");
 
+    // Modals: Join Private
     const joinPrivateModal = document.getElementById("joinPrivateModal");
     const closeJoinPrivateModalBtn = document.getElementById("closeJoinPrivateModalBtn");
     const cancelJoinPrivateModalBtn = document.getElementById("cancelJoinPrivateModalBtn");
@@ -126,12 +155,94 @@ document.addEventListener("DOMContentLoaded", () => {
     const privateInviteCodeInput = document.getElementById("privateInviteCodeInput");
     const submitJoinPrivateBtn = document.getElementById("submitJoinPrivateBtn");
 
+    // Modals: Confirm Action
     const confirmActionModal = document.getElementById("confirmActionModal");
     const closeConfirmModalBtn = document.getElementById("closeConfirmModalBtn");
     const cancelConfirmModalBtn = document.getElementById("cancelConfirmModalBtn");
     const proceedConfirmModalBtn = document.getElementById("proceedConfirmModalBtn");
     const confirmModalTitle = document.getElementById("confirmModalTitle");
     const confirmModalMessage = document.getElementById("confirmModalMessage");
+
+    // Modals: Create Post
+    const createPostModal = document.getElementById("createPostModal");
+    const closeCreatePostModalBtn = document.getElementById("closeCreatePostModalBtn");
+    const cancelCreatePostBtn = document.getElementById("cancelCreatePostBtn");
+    const createPostForm = document.getElementById("createPostForm");
+    const createPostError = document.getElementById("createPostError");
+    const postTitleInput = document.getElementById("postTitleInput");
+    const postContentInput = document.getElementById("postContentInput");
+    const postImageUploadZone = document.getElementById("postImageUploadZone");
+    const postImageFileInput = document.getElementById("postImageFileInput");
+    const postImagePlaceholder = document.getElementById("postImagePlaceholder");
+    const postImagePreviewContainer = document.getElementById("postImagePreviewContainer");
+    const postImagePreviewImg = document.getElementById("postImagePreviewImg");
+    const removePostImageBtn = document.getElementById("removePostImageBtn");
+    const postLinkInput = document.getElementById("postLinkInput");
+    const postCategoryInput = document.getElementById("postCategoryInput");
+    const postTagsInput = document.getElementById("postTagsInput");
+    const submitCreatePostBtn = document.getElementById("submitCreatePostBtn");
+
+    // Modals: Edit Post
+    const editPostModal = document.getElementById("editPostModal");
+    const closeEditPostModalBtn = document.getElementById("closeEditPostModalBtn");
+    const cancelEditPostBtn = document.getElementById("cancelEditPostBtn");
+    const editPostForm = document.getElementById("editPostForm");
+    const editPostError = document.getElementById("editPostError");
+    const editPostId = document.getElementById("editPostId");
+    const editPostTitleInput = document.getElementById("editPostTitleInput");
+    const editPostContentInput = document.getElementById("editPostContentInput");
+    const editPostLinkInput = document.getElementById("editPostLinkInput");
+    const editPostCategoryInput = document.getElementById("editPostCategoryInput");
+    const editPostTagsInput = document.getElementById("editPostTagsInput");
+    const submitEditPostBtn = document.getElementById("submitEditPostBtn");
+
+    // Modals: Verification Assessment
+    const verificationModal = document.getElementById("verificationModal");
+    const closeVerificationModalBtn = document.getElementById("closeVerificationModalBtn");
+    const cancelVerificationModalBtn = document.getElementById("cancelVerificationModalBtn");
+    const verificationForm = document.getElementById("verificationForm");
+    const verificationModalError = document.getElementById("verificationModalError");
+    const verifyPostId = document.getElementById("verifyPostId");
+    const verifyReasonInput = document.getElementById("verifyReasonInput");
+    const verifyEvidenceLinkInput = document.getElementById("verifyEvidenceLinkInput");
+    const removeVerificationVoteBtn = document.getElementById("removeVerificationVoteBtn");
+    const submitVerificationBtn = document.getElementById("submitVerificationBtn");
+
+    // Modals: Verification Details
+    const verificationDetailsModal = document.getElementById("verificationDetailsModal");
+    const closeVerificationDetailsBtn = document.getElementById("closeVerificationDetailsBtn");
+    const closeVerificationDetailsFooterBtn = document.getElementById("closeVerificationDetailsFooterBtn");
+    const detailVerifiedCount = document.getElementById("detailVerifiedCount");
+    const detailVerifiedPct = document.getElementById("detailVerifiedPct");
+    const detailNotVerifiedCount = document.getElementById("detailNotVerifiedCount");
+    const detailNotVerifiedPct = document.getElementById("detailNotVerifiedPct");
+    const detailProgressBar = document.getElementById("detailProgressBar");
+    const detailTotalVotesNote = document.getElementById("detailTotalVotesNote");
+    const verificationEvidenceList = document.getElementById("verificationEvidenceList");
+
+    // Modals: Report Post
+    const reportPostModal = document.getElementById("reportPostModal");
+    const closeReportPostModalBtn = document.getElementById("closeReportPostModalBtn");
+    const cancelReportPostBtn = document.getElementById("cancelReportPostBtn");
+    const reportPostForm = document.getElementById("reportPostForm");
+    const reportPostError = document.getElementById("reportPostError");
+    const reportPostId = document.getElementById("reportPostId");
+    const reportReasonSelect = document.getElementById("reportReasonSelect");
+    const reportDetailsInput = document.getElementById("reportDetailsInput");
+    const submitReportPostBtn = document.getElementById("submitReportPostBtn");
+
+    // Modals: Saved Posts
+    const savedPostsModal = document.getElementById("savedPostsModal");
+    const closeSavedPostsModalBtn = document.getElementById("closeSavedPostsModalBtn");
+    const savedPostsLoading = document.getElementById("savedPostsLoading");
+    const savedPostsEmpty = document.getElementById("savedPostsEmpty");
+    const savedPostsList = document.getElementById("savedPostsList");
+
+    // Modals: Image Lightbox
+    const imageLightboxModal = document.getElementById("imageLightboxModal");
+    const downloadLightboxBtn = document.getElementById("downloadLightboxBtn");
+    const closeLightboxBtn = document.getElementById("closeLightboxBtn");
+    const lightboxImage = document.getElementById("lightboxImage");
 
     // ============================================================
     // 3. APPLICATION STATE
@@ -140,6 +251,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let currentTab = "my"; // "my" or "discover"
     let currentDiscoverFilter = "ALL"; // "ALL", "PUBLIC", "PRIVATE"
     let currentGroup = null;
+    let currentCommunitySpace = "chat"; // "chat" or "posts"
     let currentMembers = [];
     let activeOnlineUsers = new Set();
     let displayedMessageIds = new Set(); // Message deduplication cache
@@ -149,6 +261,18 @@ document.addEventListener("DOMContentLoaded", () => {
     let socket = null;
     let socketReconnectTimer = null;
     let confirmActionCallback = null;
+
+    // Chat Image Attachment State
+    let pendingChatFile = null;
+
+    // Community Posts Feed State
+    let postsList = [];
+    let postsPage = 0;
+    let postsTotalPages = 1;
+    let isPostsLoading = false;
+    let currentCategoryFilter = "ALL";
+    let currentTagFilter = "";
+    let pendingPostFile = null;
 
     // Helper: authenticated REST fetch
     async function apiRequest(endpoint, options = {}) {
@@ -235,7 +359,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 senderUsername: data.senderUsername,
                 content: data.content,
                 timestamp: data.timestamp,
-                status: data.status
+                status: data.status,
+                mediaUrl: data.mediaUrl,
+                messageType: data.messageType
             } : data.message;
 
             if (currentGroup && msg && msg.groupId === currentGroup.id) {
@@ -272,7 +398,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 renderDrawerMembers();
             }
         }
-        // 4. Server error notification
+        // 4. Real-time Community Post notification
+        else if (data.type === "POST_CREATED") {
+            if (currentGroup && data.groupId === currentGroup.id) {
+                if (currentCommunitySpace === "posts") {
+                    if (newPostsBanner) newPostsBanner.style.display = "flex";
+                } else {
+                    if (newPostsDot) newPostsDot.style.display = "block";
+                }
+            }
+        }
+        // 5. Server error notification
         else if (data.type === "ERROR") {
             console.warn("WebSocket server error:", data.error);
         }
@@ -344,7 +480,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (discoverGroupsCountBadge) discoverGroupsCountBadge.textContent = discoverCount;
     }
 
-    function switchTab(tab) {
+    function switchSidebarTab(tab) {
         currentTab = tab;
         if (tab === "my") {
             tabMyGroups.classList.add("active");
@@ -358,8 +494,8 @@ document.addEventListener("DOMContentLoaded", () => {
         renderCurrentGroupList();
     }
 
-    tabMyGroups.addEventListener("click", () => switchTab("my"));
-    tabDiscoverGroups.addEventListener("click", () => switchTab("discover"));
+    tabMyGroups.addEventListener("click", () => switchSidebarTab("my"));
+    tabDiscoverGroups.addEventListener("click", () => switchSidebarTab("discover"));
 
     // Discover filter pills
     document.querySelectorAll(".filter-pill").forEach(pill => {
@@ -436,7 +572,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Render item for "My Groups" tab (WhatsApp-style compact list item)
     function renderMyGroupItem(group) {
         const item = document.createElement("div");
         item.className = `group-item ${currentGroup && currentGroup.id === group.id ? 'active' : ''}`;
@@ -453,7 +588,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     <span class="group-item-title">${escapeHtml(group.name)}</span>
                     <span class="group-item-time">${formatTimeShort(group.updatedAt || group.createdAt)}</span>
                 </div>
-                <p class="group-item-preview">${escapeHtml(group.description || "No recent messages")}</p>
+                <p class="group-item-preview">${escapeHtml(group.description || "No recent activity")}</p>
                 <div class="group-item-meta">
                     <span class="privacy-pill-micro">${isPrivate ? '🔒 Private' : '🌐 Public'}</span>
                     ${isAdmin ? '<span class="admin-tag-micro">Admin</span>' : ''}
@@ -469,7 +604,6 @@ document.addEventListener("DOMContentLoaded", () => {
         groupsListContainer.appendChild(item);
     }
 
-    // Render item for "Discover Groups" tab (Clean card with Join / Request to Join actions)
     function renderDiscoverGroupItem(group) {
         const item = document.createElement("div");
         item.className = "discover-group-item";
@@ -506,7 +640,6 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
         `;
 
-        // Bind button actions
         const joinPublicBtn = item.querySelector(".btn-join-public");
         if (joinPublicBtn) {
             joinPublicBtn.addEventListener("click", (e) => {
@@ -537,8 +670,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // ============================================================
     // 6. TWO-TIER PRIVATE GROUP JOINING WORKFLOW
     // ============================================================
-
-    // Method 1: Join with Invite Code Modal
     function openJoinPrivateModal(targetGroup = null) {
         joinPrivateError.style.display = "none";
         joinPrivateError.textContent = "";
@@ -610,7 +741,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // Method 2: Request to Join Workflow
     async function submitJoinRequest(groupId, buttonEl) {
         buttonEl.disabled = true;
         buttonEl.textContent = "Submitting...";
@@ -623,7 +753,6 @@ document.addEventListener("DOMContentLoaded", () => {
             if (res.ok) {
                 buttonEl.textContent = "Request Pending";
                 buttonEl.className = "join-action-btn pending";
-                // Update local model
                 const group = allGroups.find(g => g.id === groupId);
                 if (group) group.hasPendingRequest = true;
             } else {
@@ -640,7 +769,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Direct Public Group Join
     async function joinPublicGroup(groupId) {
         try {
             const res = await apiRequest(`/api/groups/${groupId}/join`, {
@@ -729,7 +857,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // ============================================================
-    // 8. OPEN & CLOSE GROUP CHAT VIEW
+    // 8. OPEN & CLOSE GROUP CHAT VIEW & COMMUNITY SPACES
     // ============================================================
     async function openGroupChat(group) {
         currentGroup = group;
@@ -740,6 +868,9 @@ document.addEventListener("DOMContentLoaded", () => {
         // Switch main view
         noChatSelectedState.style.display = "none";
         activeChatView.style.display = "flex";
+
+        // Reset to General Chat Space
+        switchCommunitySpace("chat");
 
         // Mobile active state
         chatMainPane.classList.add("mobile-active");
@@ -777,6 +908,16 @@ document.addEventListener("DOMContentLoaded", () => {
         // Load members list
         loadGroupMembers(group.id);
 
+        // Reset Community Posts feed state for this group
+        postsList = [];
+        postsPage = 0;
+        currentCategoryFilter = "ALL";
+        currentTagFilter = "";
+        if (postCategoryFilter) postCategoryFilter.value = "ALL";
+        if (activeTagFilterPill) activeTagFilterPill.style.display = "none";
+        if (newPostsBanner) newPostsBanner.style.display = "none";
+        if (newPostsDot) newPostsDot.style.display = "none";
+
         // If admin, load pending join requests
         if (group.admin) {
             loadPendingJoinRequests(group.id);
@@ -788,6 +929,31 @@ document.addEventListener("DOMContentLoaded", () => {
 
         messageInput.focus();
     }
+
+    function switchCommunitySpace(space) {
+        currentCommunitySpace = space;
+        if (space === "chat") {
+            tabGeneralChat.classList.add("active");
+            tabCommunityPosts.classList.remove("active");
+            chatViewContainer.style.display = "flex";
+            postsViewContainer.style.display = "none";
+            scrollMessagesToBottom();
+        } else {
+            tabCommunityPosts.classList.add("active");
+            tabGeneralChat.classList.remove("active");
+            chatViewContainer.style.display = "none";
+            postsViewContainer.style.display = "flex";
+            if (newPostsDot) newPostsDot.style.display = "none";
+
+            // Load community posts if not loaded
+            if (postsList.length === 0 && currentGroup) {
+                loadCommunityPosts(0, false);
+            }
+        }
+    }
+
+    tabGeneralChat.addEventListener("click", () => switchCommunitySpace("chat"));
+    tabCommunityPosts.addEventListener("click", () => switchCommunitySpace("posts"));
 
     function updateChatHeader(group) {
         const initial = (group.name || "G").charAt(0).toUpperCase();
@@ -825,6 +991,7 @@ document.addEventListener("DOMContentLoaded", () => {
         activeTypers.clear();
         activeOnlineUsers.clear();
         currentMembers = [];
+        postsList = [];
         updateTypingUI();
 
         activeChatView.style.display = "none";
@@ -848,7 +1015,6 @@ document.addEventListener("DOMContentLoaded", () => {
         drawerPrivacyBadge.textContent = group.privacy === "PRIVATE" ? "🔒 Private Hive" : "🌐 Public Group";
         drawerMembersCount.textContent = `${group.memberCount} members`;
 
-        // Invite code section
         const isPrivate = group.privacy === "PRIVATE";
         if (isPrivate && (group.member || group.admin) && group.inviteCode) {
             drawerInviteSection.style.display = "block";
@@ -858,7 +1024,6 @@ document.addEventListener("DOMContentLoaded", () => {
             drawerInviteSection.style.display = "none";
         }
 
-        // Danger zone buttons
         drawerDeleteBtn.style.display = group.admin ? "flex" : "none";
     }
 
@@ -881,7 +1046,6 @@ document.addEventListener("DOMContentLoaded", () => {
     toggleInfoDrawerBtn.addEventListener("click", toggleInfoDrawer);
     closeInfoDrawerBtn.addEventListener("click", closeInfoDrawer);
 
-    // Copy Invite Code in Drawer
     drawerCopyCodeBtn.addEventListener("click", () => {
         if (currentGroup && currentGroup.inviteCode) {
             navigator.clipboard.writeText(currentGroup.inviteCode).then(() => {
@@ -895,7 +1059,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // Regenerate Invite Code (Admin Only)
     drawerRegenCodeBtn.addEventListener("click", async () => {
         if (!currentGroup || !currentGroup.admin) return;
 
@@ -1045,7 +1208,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // ============================================================
-    // 12. MESSAGE HISTORY & RENDERING
+    // 12. GENERAL CHAT MESSAGE HISTORY & SENDER INSTANT DELIVERY
     // ============================================================
     async function loadMessageHistory(groupId) {
         try {
@@ -1060,7 +1223,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (messages.length === 0) {
                     messagesList.innerHTML = `
                         <div class="list-placeholder-state" style="margin: auto;">
-                            <p style="color: var(--text-muted);">No messages yet. Send a message to start the conversation!</p>
+                            <p style="color: var(--text-muted);">No messages yet. Send a message or share an image!</p>
                         </div>
                     `;
                 } else {
@@ -1081,7 +1244,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function appendMessage(msg, shouldScroll = true) {
-        // Remove empty state placeholder if present
         const placeholder = messagesList.querySelector(".list-placeholder-state");
         if (placeholder) placeholder.remove();
 
@@ -1091,16 +1253,33 @@ document.addEventListener("DOMContentLoaded", () => {
         const row = document.createElement("div");
         row.className = `message-row ${mine ? 'mine' : 'other'}`;
 
+        let mediaHtml = "";
+        if (msg.mediaUrl) {
+            mediaHtml = `
+                <div class="message-image-container">
+                    <img src="${escapeHtml(msg.mediaUrl)}" alt="Attachment" class="chat-attached-image" loading="lazy">
+                </div>
+            `;
+        }
+
         row.innerHTML = `
             <div class="message-bubble">
                 ${!mine ? `<span class="message-sender">${escapeHtml(msg.senderUsername || 'Member')}</span>` : ''}
-                <div class="message-text">${escapeHtml(msg.content)}</div>
+                ${mediaHtml}
+                ${msg.content ? `<div class="message-text">${escapeHtml(msg.content)}</div>` : ''}
                 <div class="message-meta">
                     <span class="message-time">${timeStr}</span>
                     ${mine ? '<span class="message-check">✓</span>' : ''}
                 </div>
             </div>
         `;
+
+        const imgEl = row.querySelector(".chat-attached-image");
+        if (imgEl) {
+            imgEl.addEventListener("click", () => {
+                openLightbox(msg.mediaUrl);
+            });
+        }
 
         messagesList.appendChild(row);
 
@@ -1142,13 +1321,65 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    function formatRelativeTime(isoStr) {
+        if (!isoStr) return "";
+        try {
+            const date = new Date(isoStr);
+            const now = new Date();
+            const diffSeconds = Math.floor((now - date) / 1000);
+
+            if (diffSeconds < 60) return "just now";
+            const diffMinutes = Math.floor(diffSeconds / 60);
+            if (diffMinutes < 60) return `${diffMinutes}m ago`;
+            const diffHours = Math.floor(diffMinutes / 60);
+            if (diffHours < 24) return `${diffHours}h ago`;
+            const diffDays = Math.floor(diffHours / 24);
+            if (diffDays < 7) return `${diffDays}d ago`;
+            return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+        } catch (e) {
+            return "";
+        }
+    }
+
     // ============================================================
-    // 13. REAL-TIME MESSAGE COMPOSER
+    // 13. CHAT COMPOSER WITH IMAGE ATTACHMENTS & OPTIMISTIC RENDERING
     // ============================================================
+    chatAttachBtn.addEventListener("click", () => {
+        chatFileInput.click();
+    });
+
+    chatFileInput.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        if (!file.type.startsWith("image/")) {
+            alert("Only image files (JPEG, PNG, WebP, GIF) are supported.");
+            chatFileInput.value = "";
+            return;
+        }
+
+        if (file.size > 15 * 1024 * 1024) {
+            alert("File size exceeds the 15MB limit.");
+            chatFileInput.value = "";
+            return;
+        }
+
+        pendingChatFile = file;
+        chatImageName.textContent = file.name;
+        chatPreviewThumb.src = URL.createObjectURL(file);
+        chatImagePreviewBar.style.display = "flex";
+    });
+
+    removeChatImageBtn.addEventListener("click", () => {
+        pendingChatFile = null;
+        chatFileInput.value = "";
+        chatImagePreviewBar.style.display = "none";
+        chatPreviewThumb.src = "";
+    });
+
     messageInput.addEventListener("input", () => {
         if (!currentGroup) return;
 
-        // Auto-expand height
         messageInput.style.height = "auto";
         messageInput.style.height = Math.min(messageInput.scrollHeight, 120) + "px";
 
@@ -1173,7 +1404,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // Support Shift+Enter for newline, Enter to send
     messageInput.addEventListener("keydown", (e) => {
         if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
@@ -1181,51 +1411,1321 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    chatForm.addEventListener("submit", (e) => {
+    chatForm.addEventListener("submit", async (e) => {
         e.preventDefault();
 
         if (!currentGroup) return;
 
         const content = messageInput.value.trim();
-        if (!content) return;
+        const fileToUpload = pendingChatFile;
 
-        // Reset typing indicator immediately on send
+        if (!content && !fileToUpload) return;
+
         if (typingTimeout) clearTimeout(typingTimeout);
         if (isTyping) {
             isTyping = false;
             sendTypingEvent(false);
         }
 
-        // Send through WebSocket to group room
-        if (socket && socket.readyState === WebSocket.OPEN) {
-            socket.send(JSON.stringify({
-                type: "SEND_MESSAGE",
+        sendMessageBtn.disabled = true;
+
+        try {
+            let uploadedMediaUrl = null;
+
+            if (fileToUpload) {
+                const formData = new FormData();
+                formData.append("file", fileToUpload);
+                formData.append("folder", `unihive/chat/${currentGroup.id}`);
+
+                const uploadRes = await fetch(`${CONFIG.API_BASE_URL}/api/upload/image`, {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${token}`
+                    },
+                    body: formData
+                });
+
+                if (uploadRes.ok) {
+                    const uploadData = await uploadRes.json();
+                    uploadedMediaUrl = uploadData.url;
+                } else {
+                    alert("Failed to upload image. Please try again.");
+                    sendMessageBtn.disabled = false;
+                    return;
+                }
+            }
+
+            // Zero-latency optimistic append in sender's UI
+            const tempId = "client-" + Date.now() + "-" + Math.random().toString(36).substr(2, 6);
+            displayedMessageIds.add(tempId);
+
+            const optimisticMsg = {
+                id: tempId,
+                messageId: tempId,
                 groupId: currentGroup.id,
-                content: content
-            }));
+                senderId: currentUser.id,
+                senderUsername: currentUser.username,
+                content: content,
+                timestamp: new Date().toISOString(),
+                status: "SENT",
+                mediaUrl: uploadedMediaUrl,
+                messageType: uploadedMediaUrl ? "IMAGE" : "TEXT"
+            };
+            appendMessage(optimisticMsg, true);
+
+            // Send structured frame over WebSocket
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify({
+                    type: "SEND_MESSAGE",
+                    groupId: currentGroup.id,
+                    content: content,
+                    mediaUrl: uploadedMediaUrl,
+                    messageType: uploadedMediaUrl ? "IMAGE" : "TEXT"
+                }));
+            } else {
+                initWebSocket();
+                setTimeout(() => {
+                    if (socket && socket.readyState === WebSocket.OPEN) {
+                        socket.send(JSON.stringify({
+                            type: "SEND_MESSAGE",
+                            groupId: currentGroup.id,
+                            content: content,
+                            mediaUrl: uploadedMediaUrl,
+                            messageType: uploadedMediaUrl ? "IMAGE" : "TEXT"
+                        }));
+                    }
+                }, 500);
+            }
+
+            // Reset inputs & preview
             messageInput.value = "";
             messageInput.style.height = "auto";
-        } else {
-            // Reconnecting fallback
-            initWebSocket();
-            setTimeout(() => {
-                if (socket && socket.readyState === WebSocket.OPEN) {
-                    socket.send(JSON.stringify({
-                        type: "SEND_MESSAGE",
-                        groupId: currentGroup.id,
-                        content: content
-                    }));
-                    messageInput.value = "";
-                    messageInput.style.height = "auto";
-                } else {
-                    alert("Reconnecting to chat server... Please try again in a moment.");
-                }
-            }, 500);
+            pendingChatFile = null;
+            chatFileInput.value = "";
+            chatImagePreviewBar.style.display = "none";
+            chatPreviewThumb.src = "";
+
+        } catch (err) {
+            console.error("Error sending message:", err);
+            alert("Error sending message. Please check connection.");
+        } finally {
+            sendMessageBtn.disabled = false;
         }
     });
 
     // ============================================================
-    // 14. LEAVE & DELETE GROUP CONFIRMATIONS
+    // 14. COMMUNITY POSTS FEED, INFINITE SCROLL & FILTERS
+    // ============================================================
+    async function loadCommunityPosts(page = 0, append = false) {
+        if (!currentGroup || isPostsLoading) return;
+        isPostsLoading = true;
+
+        if (postsLoadingIndicator) postsLoadingIndicator.style.display = "flex";
+
+        try {
+            let url = `/api/communities/${currentGroup.id}/posts?page=${page}&size=20`;
+            if (currentCategoryFilter && currentCategoryFilter !== "ALL") {
+                url += `&category=${encodeURIComponent(currentCategoryFilter)}`;
+            }
+            if (currentTagFilter) {
+                url += `&tag=${encodeURIComponent(currentTagFilter)}`;
+            }
+
+            const res = await apiRequest(url);
+            if (!res) return;
+
+            if (res.ok) {
+                const data = await res.json();
+                const fetchedPosts = data.content || [];
+
+                postsPage = data.number != null ? data.number : page;
+                postsTotalPages = data.totalPages != null ? data.totalPages : 1;
+
+                if (!append) {
+                    postsList = fetchedPosts;
+                    postsFeedContainer.innerHTML = "";
+                } else {
+                    postsList = postsList.concat(fetchedPosts);
+                }
+
+                if (postsList.length === 0) {
+                    postsEmptyState.style.display = "flex";
+                    postsFeedContainer.style.display = "none";
+                } else {
+                    postsEmptyState.style.display = "none";
+                    postsFeedContainer.style.display = "flex";
+
+                    fetchedPosts.forEach(post => {
+                        renderPostCard(post);
+                    });
+                }
+            } else {
+                console.error("Failed to load community posts:", res.status);
+            }
+        } catch (err) {
+            console.error("Error fetching community posts:", err);
+        } finally {
+            isPostsLoading = false;
+            if (postsLoadingIndicator) postsLoadingIndicator.style.display = "none";
+        }
+    }
+
+    postCategoryFilter.addEventListener("change", () => {
+        currentCategoryFilter = postCategoryFilter.value;
+        loadCommunityPosts(0, false);
+    });
+
+    clearTagFilterBtn.addEventListener("click", () => {
+        currentTagFilter = "";
+        activeTagFilterPill.style.display = "none";
+        loadCommunityPosts(0, false);
+    });
+
+    refreshPostsBtn.addEventListener("click", () => {
+        if (newPostsBanner) newPostsBanner.style.display = "none";
+        if (newPostsDot) newPostsDot.style.display = "none";
+        loadCommunityPosts(0, false);
+    });
+
+    newPostsBanner.addEventListener("click", () => {
+        newPostsBanner.style.display = "none";
+        if (newPostsDot) newPostsDot.style.display = "none";
+        postsScrollStream.scrollTo({ top: 0, behavior: 'smooth' });
+        loadCommunityPosts(0, false);
+    });
+
+    postsScrollStream.addEventListener("scroll", () => {
+        const threshold = 200;
+        const reachedBottom = (postsScrollStream.scrollHeight - postsScrollStream.scrollTop - postsScrollStream.clientHeight) < threshold;
+        if (reachedBottom && !isPostsLoading && postsPage + 1 < postsTotalPages) {
+            loadCommunityPosts(postsPage + 1, true);
+        }
+    });
+
+    // ============================================================
+    // 15. POST CARD RENDERING, REACTIONS & VERIFICATION GAUGE
+    // ============================================================
+    function renderPostCard(post) {
+        const card = document.createElement("article");
+        card.className = "post-card";
+        card.id = `post-card-${post.id}`;
+        card.setAttribute("data-post-id", post.id);
+
+        const initial = (post.authorUsername || "U").charAt(0).toUpperCase();
+        const timeAgo = formatRelativeTime(post.createdAt);
+        const isAuthor = currentUser.id === post.authorId;
+        const isAdmin = currentGroup && currentGroup.admin;
+        const canEdit = post.canEdit || isAuthor;
+        const canDelete = post.canDelete || isAuthor || isAdmin;
+
+        // Tag Pills HTML
+        let tagsHtml = "";
+        if (post.tags && post.tags.length > 0) {
+            tagsHtml = `
+                <div class="post-tags-row">
+                    ${post.tags.map(tag => `<span class="post-tag-chip" data-tag="${escapeHtml(tag)}">#${escapeHtml(tag)}</span>`).join("")}
+                </div>
+            `;
+        }
+
+        // Image Attachment HTML
+        let mediaHtml = "";
+        if (post.mediaUrl) {
+            mediaHtml = `
+                <div class="post-media-container">
+                    <img src="${escapeHtml(post.mediaUrl)}" alt="Post image" class="post-media-img" loading="lazy">
+                </div>
+            `;
+        }
+
+        // External Link Preview HTML
+        let linkHtml = "";
+        if (post.externalUrl) {
+            linkHtml = `
+                <a href="${escapeHtml(post.externalUrl)}" target="_blank" rel="noopener noreferrer" class="post-external-link-card">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                    </svg>
+                    <span class="external-url-text">${escapeHtml(post.externalUrl)}</span>
+                </a>
+            `;
+        }
+
+        // Community Verification Gauge HTML
+        const totalVerifications = post.totalVerifications || 0;
+        const verifiedPercent = post.verifiedPercent || 0;
+        const notVerifiedPercent = post.notVerifiedPercent || 0;
+        const userVerdict = post.userVerification;
+
+        const verificationGaugeHtml = `
+            <div class="community-verification-block" id="verification-gauge-${post.id}">
+                <div class="verification-gauge-header">
+                    <div class="gauge-title-row">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                        <strong>Community Verification</strong>
+                    </div>
+                    <button type="button" class="btn-view-verifications" data-post-id="${post.id}">
+                        ${totalVerifications} ${totalVerifications === 1 ? 'assessment' : 'assessments'} · Details
+                    </button>
+                </div>
+
+                <div class="verification-track" title="Verified: ${verifiedPercent}%, Not Verified: ${notVerifiedPercent}%">
+                    <div class="verification-bar-true" style="width: ${verifiedPercent}%;"></div>
+                    <div class="verification-bar-false" style="width: ${notVerifiedPercent}%;"></div>
+                </div>
+
+                <div class="verification-labels-row">
+                    <span class="label-verified">✓ ${verifiedPercent}% Verified (${post.verifiedCount || 0})</span>
+                    <span class="label-not-verified">✕ ${notVerifiedPercent}% Not Verified (${post.notVerifiedCount || 0})</span>
+                </div>
+
+                <div class="verification-action-buttons">
+                    <button type="button" class="verify-btn btn-vote-true ${userVerdict === 'VERIFIED' ? 'active-true' : ''}" data-post-id="${post.id}">
+                        <span class="vote-icon">✓</span> Verify / True
+                    </button>
+                    <button type="button" class="verify-btn btn-vote-false ${userVerdict === 'NOT_VERIFIED' ? 'active-false' : ''}" data-post-id="${post.id}">
+                        <span class="vote-icon">✕</span> Not Verified / False
+                    </button>
+                </div>
+            </div>
+        `;
+
+        const userReaction = post.userReaction;
+        const isBookmarked = post.isBookmarked || post.bookmarked;
+
+        card.innerHTML = `
+            <div class="post-header">
+                <div class="post-author-meta">
+                    <div class="post-author-avatar">${initial}</div>
+                    <div class="post-author-info">
+                        <span class="post-author-name">${escapeHtml(post.authorUsername)}</span>
+                        <div class="post-meta-sub">
+                            <span class="post-timestamp" title="${new Date(post.createdAt).toLocaleString()}">${timeAgo}</span>
+                            ${post.edited ? '<span class="post-edited-tag">• edited</span>' : ''}
+                            <span class="post-category-badge">${escapeHtml(post.category || 'General')}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="post-menu-wrapper">
+                    <button type="button" class="icon-btn post-menu-btn" title="Post options">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="1"></circle>
+                            <circle cx="12" cy="5" r="1"></circle>
+                            <circle cx="12" cy="19" r="1"></circle>
+                        </svg>
+                    </button>
+                    <div class="dropdown-menu post-dropdown-menu" style="display: none;">
+                        ${canEdit ? `
+                            <button type="button" class="dropdown-item btn-menu-edit-post" data-post-id="${post.id}">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                                Edit Post
+                            </button>
+                        ` : ''}
+                        ${canDelete ? `
+                            <button type="button" class="dropdown-item danger-item btn-menu-delete-post" data-post-id="${post.id}">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                Delete Post
+                            </button>
+                        ` : ''}
+                        <button type="button" class="dropdown-item btn-menu-report-post" data-post-id="${post.id}">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" y1="22" x2="4" y2="15"></line></svg>
+                            Report Post
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="post-body">
+                ${post.title ? `<h3 class="post-title">${escapeHtml(post.title)}</h3>` : ''}
+                <div class="post-text-content">${escapeHtml(post.content).replace(/\n/g, '<br>')}</div>
+                ${linkHtml}
+                ${mediaHtml}
+                ${tagsHtml}
+            </div>
+
+            ${verificationGaugeHtml}
+
+            <div class="post-social-bar">
+                <div class="social-actions-left">
+                    <button type="button" class="social-action-btn btn-post-like ${userReaction === 'LIKE' ? 'active-like' : ''}" data-post-id="${post.id}" title="Like">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path>
+                        </svg>
+                        <span class="like-count">${post.likeCount || 0}</span>
+                    </button>
+
+                    <button type="button" class="social-action-btn btn-post-dislike ${userReaction === 'DISLIKE' ? 'active-dislike' : ''}" data-post-id="${post.id}" title="Dislike">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"></path>
+                        </svg>
+                        <span class="dislike-count">${post.dislikeCount || 0}</span>
+                    </button>
+
+                    <button type="button" class="social-action-btn btn-post-comments" data-post-id="${post.id}" title="Comments">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                        <span class="comment-count">${post.commentCount || 0}</span>
+                    </button>
+                </div>
+
+                <div class="social-actions-right">
+                    <button type="button" class="social-action-btn btn-post-bookmark ${isBookmarked ? 'active-bookmark' : ''}" data-post-id="${post.id}" title="${isBookmarked ? 'Remove Bookmark' : 'Save Post'}">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="${isBookmarked ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                    </button>
+
+                    <button type="button" class="social-action-btn btn-post-share" data-post-id="${post.id}" title="Share Link">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="18" cy="5" r="3"></circle>
+                            <circle cx="6" cy="12" r="3"></circle>
+                            <circle cx="18" cy="19" r="3"></circle>
+                            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="post-comments-section" id="comments-section-${post.id}" style="display: none;">
+                <div class="comments-list-container" id="comments-list-${post.id}">
+                    <div class="loading-spinner small-spinner"></div>
+                </div>
+
+                <form class="comment-composer-form" data-post-id="${post.id}">
+                    <input type="text" class="comment-input" placeholder="Write a comment..." maxlength="1000" autocomplete="off" required>
+                    <button type="submit" class="comment-submit-btn">Comment</button>
+                </form>
+            </div>
+        `;
+
+        // Tag Clicks
+        card.querySelectorAll(".post-tag-chip").forEach(chip => {
+            chip.addEventListener("click", () => {
+                const tag = chip.getAttribute("data-tag");
+                currentTagFilter = tag;
+                if (activeTagName) activeTagName.textContent = "#" + tag;
+                if (activeTagFilterPill) activeTagFilterPill.style.display = "inline-flex";
+                loadCommunityPosts(0, false);
+            });
+        });
+
+        // Media Click -> Lightbox
+        const mediaImg = card.querySelector(".post-media-img");
+        if (mediaImg) {
+            mediaImg.addEventListener("click", () => {
+                openLightbox(post.mediaUrl);
+            });
+        }
+
+        // Post Menu Dropdown
+        const menuBtn = card.querySelector(".post-menu-btn");
+        const menuDropdown = card.querySelector(".post-dropdown-menu");
+        if (menuBtn && menuDropdown) {
+            menuBtn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                document.querySelectorAll(".post-dropdown-menu").forEach(m => {
+                    if (m !== menuDropdown) m.style.display = "none";
+                });
+                menuDropdown.style.display = menuDropdown.style.display === "none" ? "block" : "none";
+            });
+        }
+
+        const editOption = card.querySelector(".btn-menu-edit-post");
+        if (editOption) {
+            editOption.addEventListener("click", () => {
+                menuDropdown.style.display = "none";
+                openEditPostModal(post);
+            });
+        }
+
+        const deleteOption = card.querySelector(".btn-menu-delete-post");
+        if (deleteOption) {
+            deleteOption.addEventListener("click", () => {
+                menuDropdown.style.display = "none";
+                handleDeletePost(post.id);
+            });
+        }
+
+        const reportOption = card.querySelector(".btn-menu-report-post");
+        if (reportOption) {
+            reportOption.addEventListener("click", () => {
+                menuDropdown.style.display = "none";
+                openReportPostModal(post.id);
+            });
+        }
+
+        const voteTrueBtn = card.querySelector(".btn-vote-true");
+        if (voteTrueBtn) {
+            voteTrueBtn.addEventListener("click", () => {
+                openVerificationModal(post.id, "VERIFIED");
+            });
+        }
+
+        const voteFalseBtn = card.querySelector(".btn-vote-false");
+        if (voteFalseBtn) {
+            voteFalseBtn.addEventListener("click", () => {
+                openVerificationModal(post.id, "NOT_VERIFIED");
+            });
+        }
+
+        const viewVerificationsBtn = card.querySelector(".btn-view-verifications");
+        if (viewVerificationsBtn) {
+            viewVerificationsBtn.addEventListener("click", () => {
+                openVerificationDetailsModal(post.id);
+            });
+        }
+
+        const likeBtn = card.querySelector(".btn-post-like");
+        if (likeBtn) {
+            likeBtn.addEventListener("click", () => {
+                handleReaction(post.id, "LIKE", card);
+            });
+        }
+
+        const dislikeBtn = card.querySelector(".btn-post-dislike");
+        if (dislikeBtn) {
+            dislikeBtn.addEventListener("click", () => {
+                handleReaction(post.id, "DISLIKE", card);
+            });
+        }
+
+        const bookmarkBtn = card.querySelector(".btn-post-bookmark");
+        if (bookmarkBtn) {
+            bookmarkBtn.addEventListener("click", () => {
+                handleBookmarkToggle(post.id, bookmarkBtn);
+            });
+        }
+
+        const shareBtn = card.querySelector(".btn-post-share");
+        if (shareBtn) {
+            shareBtn.addEventListener("click", () => {
+                handleSharePost(post);
+            });
+        }
+
+        const commentsToggleBtn = card.querySelector(".btn-post-comments");
+        const commentsSection = card.querySelector(`#comments-section-${post.id}`);
+        if (commentsToggleBtn && commentsSection) {
+            commentsToggleBtn.addEventListener("click", () => {
+                const isHidden = commentsSection.style.display === "none";
+                commentsSection.style.display = isHidden ? "block" : "none";
+                if (isHidden) {
+                    loadPostComments(post.id);
+                }
+            });
+        }
+
+        const commentForm = card.querySelector(`.comment-composer-form[data-post-id="${post.id}"]`);
+        if (commentForm) {
+            commentForm.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const input = commentForm.querySelector(".comment-input");
+                const text = input.value.trim();
+                if (!text) return;
+
+                const submitBtn = commentForm.querySelector(".comment-submit-btn");
+                submitBtn.disabled = true;
+
+                try {
+                    const res = await apiRequest(`/api/posts/${post.id}/comments`, {
+                        method: "POST",
+                        body: JSON.stringify({ content: text })
+                    });
+
+                    if (res && res.ok) {
+                        input.value = "";
+                        await loadPostComments(post.id);
+                        post.commentCount = (post.commentCount || 0) + 1;
+                        const countEl = card.querySelector(".comment-count");
+                        if (countEl) countEl.textContent = post.commentCount;
+                    } else {
+                        const err = await res.json();
+                        alert(err.error || "Failed to post comment.");
+                    }
+                } catch (err) {
+                    console.error("Comment submit error:", err);
+                } finally {
+                    submitBtn.disabled = false;
+                }
+            });
+        }
+
+        postsFeedContainer.appendChild(card);
+    }
+
+    document.addEventListener("click", (e) => {
+        if (!e.target.closest(".post-menu-wrapper")) {
+            document.querySelectorAll(".post-dropdown-menu").forEach(m => m.style.display = "none");
+        }
+    });
+
+    // ============================================================
+    // 16. SOCIAL ACTIONS: LIKE & DISLIKE TOGGLE
+    // ============================================================
+    async function handleReaction(postId, type, card) {
+        try {
+            const res = await apiRequest(`/api/posts/${postId}/react`, {
+                method: "POST",
+                body: JSON.stringify({ type })
+            });
+
+            if (res && res.ok) {
+                const result = await res.json();
+                const likeBtn = card.querySelector(".btn-post-like");
+                const dislikeBtn = card.querySelector(".btn-post-dislike");
+                const likeCountEl = card.querySelector(".like-count");
+                const dislikeCountEl = card.querySelector(".dislike-count");
+
+                if (likeCountEl) likeCountEl.textContent = result.likeCount != null ? result.likeCount : 0;
+                if (dislikeCountEl) dislikeCountEl.textContent = result.dislikeCount != null ? result.dislikeCount : 0;
+
+                if (result.userReaction === "LIKE") {
+                    likeBtn.classList.add("active-like");
+                    dislikeBtn.classList.remove("active-dislike");
+                } else if (result.userReaction === "DISLIKE") {
+                    dislikeBtn.classList.add("active-dislike");
+                    likeBtn.classList.remove("active-like");
+                } else {
+                    likeBtn.classList.remove("active-like");
+                    dislikeBtn.classList.remove("active-dislike");
+                }
+            }
+        } catch (e) {
+            console.error("Reaction error:", e);
+        }
+    }
+
+    // ============================================================
+    // 17. BOOKMARKING & SAVED POSTS
+    // ============================================================
+    async function handleBookmarkToggle(postId, bookmarkBtn) {
+        try {
+            const res = await apiRequest(`/api/posts/${postId}/bookmark`, {
+                method: "POST"
+            });
+
+            if (res && res.ok) {
+                const result = await res.json();
+                const isBookmarked = result.bookmarked;
+
+                if (isBookmarked) {
+                    bookmarkBtn.classList.add("active-bookmark");
+                    bookmarkBtn.title = "Remove Bookmark";
+                    bookmarkBtn.querySelector("svg").setAttribute("fill", "currentColor");
+                } else {
+                    bookmarkBtn.classList.remove("active-bookmark");
+                    bookmarkBtn.title = "Save Post";
+                    bookmarkBtn.querySelector("svg").setAttribute("fill", "none");
+                }
+            }
+        } catch (e) {
+            console.error("Bookmark error:", e);
+        }
+    }
+
+    menuItemSavedPosts.addEventListener("click", () => {
+        userDropdownMenu.style.display = "none";
+        openSavedPostsModal();
+    });
+
+    closeSavedPostsModalBtn.addEventListener("click", () => {
+        savedPostsModal.style.display = "none";
+    });
+
+    savedPostsModal.addEventListener("click", (e) => {
+        if (e.target === savedPostsModal) savedPostsModal.style.display = "none";
+    });
+
+    async function openSavedPostsModal() {
+        savedPostsModal.style.display = "flex";
+        savedPostsLoading.style.display = "flex";
+        savedPostsEmpty.style.display = "none";
+        savedPostsList.innerHTML = "";
+
+        try {
+            const res = await apiRequest("/api/users/me/bookmarks?page=0&size=50");
+            if (res && res.ok) {
+                const data = await res.json();
+                const bookmarkedPosts = data.content || [];
+
+                if (bookmarkedPosts.length === 0) {
+                    savedPostsEmpty.style.display = "flex";
+                } else {
+                    bookmarkedPosts.forEach(post => {
+                        const item = document.createElement("div");
+                        item.className = "saved-post-item";
+                        item.innerHTML = `
+                            <div class="saved-post-header">
+                                <strong>${escapeHtml(post.title || "Community Post")}</strong>
+                                <span class="post-category-badge">${escapeHtml(post.category || "General")}</span>
+                            </div>
+                            <p class="saved-post-preview">${escapeHtml(post.content || "")}</p>
+                            <div class="saved-post-footer">
+                                <span class="metadata-text">Posted by ${escapeHtml(post.authorUsername)} · ${formatRelativeTime(post.createdAt)}</span>
+                                <button type="button" class="small-btn primary-btn btn-view-saved-post" data-community-id="${post.communityId}">
+                                    Go to Community
+                                </button>
+                            </div>
+                        `;
+
+                        const viewBtn = item.querySelector(".btn-view-saved-post");
+                        viewBtn.addEventListener("click", async () => {
+                            savedPostsModal.style.display = "none";
+                            const target = allGroups.find(g => g.id === post.communityId);
+                            if (target) {
+                                openGroupChat(target);
+                                switchCommunitySpace("posts");
+                            }
+                        });
+
+                        savedPostsList.appendChild(item);
+                    });
+                }
+            }
+        } catch (e) {
+            console.error("Saved posts fetch error:", e);
+        } finally {
+            savedPostsLoading.style.display = "none";
+        }
+    }
+
+    // ============================================================
+    // 18. SHARE POST LINK
+    // ============================================================
+    function handleSharePost(post) {
+        const shareUrl = `${window.location.origin}${window.location.pathname}#post-${post.id}`;
+        if (navigator.share) {
+            navigator.share({
+                title: post.title || "UniHive Community Post",
+                text: post.content ? post.content.substring(0, 100) + "..." : "Check out this community post on UniHive",
+                url: shareUrl
+            }).catch(() => {});
+        } else {
+            navigator.clipboard.writeText(shareUrl).then(() => {
+                alert("Post link copied to clipboard!");
+            }).catch(() => {
+                prompt("Copy post link:", shareUrl);
+            });
+        }
+    }
+
+    // ============================================================
+    // 19. POST COMMENTS WORKFLOW
+    // ============================================================
+    async function loadPostComments(postId) {
+        const listContainer = document.getElementById(`comments-list-${postId}`);
+        if (!listContainer) return;
+
+        try {
+            const res = await apiRequest(`/api/posts/${postId}/comments?page=0&size=50`);
+            if (res && res.ok) {
+                const data = await res.json();
+                const comments = data.content || [];
+                listContainer.innerHTML = "";
+
+                if (comments.length === 0) {
+                    listContainer.innerHTML = `<p class="empty-comments-note">No comments yet. Start the discussion!</p>`;
+                    return;
+                }
+
+                comments.forEach(comment => {
+                    const row = document.createElement("div");
+                    row.className = "comment-row";
+                    const initial = (comment.authorUsername || "U").charAt(0).toUpperCase();
+                    const isSelf = comment.authorId === currentUser.id;
+                    const canDelete = comment.canDelete || isSelf;
+
+                    row.innerHTML = `
+                        <div class="comment-avatar">${initial}</div>
+                        <div class="comment-content-box">
+                            <div class="comment-header-line">
+                                <strong class="comment-author">${escapeHtml(comment.authorUsername)}</strong>
+                                <span class="comment-time">${formatRelativeTime(comment.createdAt)}</span>
+                                ${canDelete ? `
+                                    <button type="button" class="btn-delete-comment" title="Delete comment" data-comment-id="${comment.id}">&times;</button>
+                                ` : ''}
+                            </div>
+                            <div class="comment-text">${escapeHtml(comment.content)}</div>
+                        </div>
+                    `;
+
+                    const delBtn = row.querySelector(".btn-delete-comment");
+                    if (delBtn) {
+                        delBtn.addEventListener("click", async () => {
+                            if (confirm("Delete this comment?")) {
+                                const delRes = await apiRequest(`/api/posts/${postId}/comments/${comment.id}`, {
+                                    method: "DELETE"
+                                });
+                                if (delRes && delRes.ok) {
+                                    await loadPostComments(postId);
+                                    const card = document.getElementById(`post-card-${postId}`);
+                                    if (card) {
+                                        const countEl = card.querySelector(".comment-count");
+                                        const currentVal = parseInt(countEl.textContent, 10) || 1;
+                                        countEl.textContent = Math.max(0, currentVal - 1);
+                                    }
+                                }
+                            }
+                        });
+                    }
+
+                    listContainer.appendChild(row);
+                });
+            }
+        } catch (e) {
+            console.error("Load comments error:", e);
+            listContainer.innerHTML = `<p class="error-note">Failed to load comments.</p>`;
+        }
+    }
+
+    // ============================================================
+    // 20. COMMUNITY VERIFICATION ASSESSMENT WORKFLOW
+    // ============================================================
+    function openVerificationModal(postId, defaultVerdict = "VERIFIED") {
+        verificationModalError.style.display = "none";
+        verifyPostId.value = postId;
+        verifyReasonInput.value = "";
+        verifyEvidenceLinkInput.value = "";
+
+        const radio = verificationForm.querySelector(`input[name="verificationVerdict"][value="${defaultVerdict}"]`);
+        if (radio) radio.checked = true;
+
+        const post = postsList.find(p => p.id === postId);
+        if (post && post.userVerification) {
+            removeVerificationVoteBtn.style.display = "inline-block";
+        } else {
+            removeVerificationVoteBtn.style.display = "none";
+        }
+
+        verificationModal.style.display = "flex";
+    }
+
+    function closeVerificationModal() {
+        verificationModal.style.display = "none";
+    }
+
+    closeVerificationModalBtn.addEventListener("click", closeVerificationModal);
+    cancelVerificationModalBtn.addEventListener("click", closeVerificationModal);
+    verificationModal.addEventListener("click", (e) => {
+        if (e.target === verificationModal) closeVerificationModal();
+    });
+
+    verificationForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        verificationModalError.style.display = "none";
+
+        const postId = verifyPostId.value;
+        const verdictRadio = verificationForm.querySelector('input[name="verificationVerdict"]:checked');
+        const verdict = verdictRadio ? verdictRadio.value : "VERIFIED";
+        const reason = verifyReasonInput.value.trim();
+        const evidenceUrl = verifyEvidenceLinkInput.value.trim();
+
+        submitVerificationBtn.disabled = true;
+        submitVerificationBtn.textContent = "Submitting...";
+
+        try {
+            const res = await apiRequest(`/api/posts/${postId}/verify`, {
+                method: "POST",
+                body: JSON.stringify({
+                    verdict,
+                    reason,
+                    evidenceUrl
+                })
+            });
+
+            if (res && res.ok) {
+                const result = await res.json();
+                updatePostVerificationInDOM(postId, result);
+                closeVerificationModal();
+            } else {
+                const err = await res.json();
+                verificationModalError.textContent = err.error || "Failed to submit verification.";
+                verificationModalError.style.display = "block";
+            }
+        } catch (err) {
+            console.error("Verification submit error:", err);
+            verificationModalError.textContent = "Network error submitting verification.";
+            verificationModalError.style.display = "block";
+        } finally {
+            submitVerificationBtn.disabled = false;
+            submitVerificationBtn.textContent = "Submit Assessment";
+        }
+    });
+
+    removeVerificationVoteBtn.addEventListener("click", async () => {
+        const postId = verifyPostId.value;
+        if (!postId) return;
+
+        removeVerificationVoteBtn.disabled = true;
+
+        try {
+            const res = await apiRequest(`/api/posts/${postId}/verify`, {
+                method: "DELETE"
+            });
+
+            if (res && res.ok) {
+                const result = await res.json();
+                updatePostVerificationInDOM(postId, result);
+                closeVerificationModal();
+            } else {
+                const err = await res.json();
+                alert(err.error || "Failed to remove verification vote.");
+            }
+        } catch (e) {
+            console.error("Remove verification vote error:", e);
+        } finally {
+            removeVerificationVoteBtn.disabled = false;
+        }
+    });
+
+    function updatePostVerificationInDOM(postId, result) {
+        const post = postsList.find(p => p.id === postId);
+        if (post) {
+            post.verifiedCount = result.verifiedCount;
+            post.notVerifiedCount = result.notVerifiedCount;
+            post.totalVerifications = result.totalVerifications;
+            post.verifiedPercent = result.verifiedPercent;
+            post.notVerifiedPercent = result.notVerifiedPercent;
+            post.userVerification = result.userVerification;
+        }
+
+        const gaugeEl = document.getElementById(`verification-gauge-${postId}`);
+        if (!gaugeEl) return;
+
+        const totalVerifications = result.totalVerifications || 0;
+        const verifiedPercent = result.verifiedPercent || 0;
+        const notVerifiedPercent = result.notVerifiedPercent || 0;
+        const userVerdict = result.userVerification;
+
+        const detailsBtn = gaugeEl.querySelector(".btn-view-verifications");
+        if (detailsBtn) {
+            detailsBtn.textContent = `${totalVerifications} ${totalVerifications === 1 ? 'assessment' : 'assessments'} · Details`;
+        }
+
+        const barTrue = gaugeEl.querySelector(".verification-bar-true");
+        const barFalse = gaugeEl.querySelector(".verification-bar-false");
+        if (barTrue) barTrue.style.width = `${verifiedPercent}%`;
+        if (barFalse) barFalse.style.width = `${notVerifiedPercent}%`;
+
+        const lblVerified = gaugeEl.querySelector(".label-verified");
+        const lblNotVerified = gaugeEl.querySelector(".label-not-verified");
+        if (lblVerified) lblVerified.textContent = `✓ ${verifiedPercent}% Verified (${result.verifiedCount || 0})`;
+        if (lblNotVerified) lblNotVerified.textContent = `✕ ${notVerifiedPercent}% Not Verified (${result.notVerifiedCount || 0})`;
+
+        const btnTrue = gaugeEl.querySelector(".btn-vote-true");
+        const btnFalse = gaugeEl.querySelector(".btn-vote-false");
+        if (btnTrue) {
+            if (userVerdict === "VERIFIED") btnTrue.classList.add("active-true");
+            else btnTrue.classList.remove("active-true");
+        }
+        if (btnFalse) {
+            if (userVerdict === "NOT_VERIFIED") btnFalse.classList.add("active-false");
+            else btnFalse.classList.remove("active-false");
+        }
+    }
+
+    // ============================================================
+    // 21. VERIFICATION BREAKDOWN DETAILS MODAL
+    // ============================================================
+    async function openVerificationDetailsModal(postId) {
+        verificationDetailsModal.style.display = "flex";
+        detailVerifiedCount.textContent = "0";
+        detailVerifiedPct.textContent = "0%";
+        detailNotVerifiedCount.textContent = "0";
+        detailNotVerifiedPct.textContent = "0%";
+        detailProgressBar.style.width = "0%";
+        detailTotalVotesNote.textContent = "Loading assessments...";
+        verificationEvidenceList.innerHTML = `<div class="loading-spinner small-spinner"></div>`;
+
+        try {
+            const res = await apiRequest(`/api/posts/${postId}/verifications`);
+            if (res && res.ok) {
+                const data = await res.json();
+                detailVerifiedCount.textContent = data.verifiedCount || 0;
+                detailVerifiedPct.textContent = `${data.verifiedPercent || 0}%`;
+                detailNotVerifiedCount.textContent = data.notVerifiedCount || 0;
+                detailNotVerifiedPct.textContent = `${data.notVerifiedPercent || 0}%`;
+                detailProgressBar.style.width = `${data.verifiedPercent || 0}%`;
+                detailTotalVotesNote.textContent = `${data.totalAssessments || 0} members reviewed this post.`;
+
+                verificationEvidenceList.innerHTML = "";
+                const items = data.assessments || [];
+
+                if (items.length === 0) {
+                    verificationEvidenceList.innerHTML = `<p class="empty-state-text" style="padding: 16px 0;">No reviews with explanations provided yet.</p>`;
+                } else {
+                    items.forEach(item => {
+                        const isTrue = item.verdict === "VERIFIED";
+                        const row = document.createElement("div");
+                        row.className = "evidence-item-card";
+                        row.innerHTML = `
+                            <div class="evidence-item-header">
+                                <strong class="evidence-reviewer">${escapeHtml(item.username)}</strong>
+                                <span class="evidence-verdict-pill ${isTrue ? 'verified' : 'unverified'}">
+                                    ${isTrue ? '✓ Verified / True' : '✕ Not Verified / False'}
+                                </span>
+                                <span class="evidence-time">${formatRelativeTime(item.createdAt)}</span>
+                            </div>
+                            ${item.reason ? `<p class="evidence-reason-text">${escapeHtml(item.reason)}</p>` : ''}
+                            ${item.evidenceUrl ? `
+                                <a href="${escapeHtml(item.evidenceUrl)}" target="_blank" rel="noopener noreferrer" class="evidence-source-link">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                                    </svg>
+                                    <span>${escapeHtml(item.evidenceUrl)}</span>
+                                </a>
+                            ` : ''}
+                        `;
+                        verificationEvidenceList.appendChild(row);
+                    });
+                }
+            } else {
+                detailTotalVotesNote.textContent = "Failed to load verification breakdown.";
+                verificationEvidenceList.innerHTML = "";
+            }
+        } catch (e) {
+            console.error("Verification details error:", e);
+        }
+    }
+
+    closeVerificationDetailsBtn.addEventListener("click", () => verificationDetailsModal.style.display = "none");
+    closeVerificationDetailsFooterBtn.addEventListener("click", () => verificationDetailsModal.style.display = "none");
+    verificationDetailsModal.addEventListener("click", (e) => {
+        if (e.target === verificationDetailsModal) verificationDetailsModal.style.display = "none";
+    });
+
+    // ============================================================
+    // 22. CREATE POST WORKFLOW
+    // ============================================================
+    function openCreatePostModal() {
+        createPostError.style.display = "none";
+        createPostError.textContent = "";
+        postTitleInput.value = "";
+        postContentInput.value = "";
+        postLinkInput.value = "";
+        postTagsInput.value = "";
+        postCategoryInput.value = "General";
+
+        pendingPostFile = null;
+        postImageFileInput.value = "";
+        postImagePlaceholder.style.display = "flex";
+        postImagePreviewContainer.style.display = "none";
+        postImagePreviewImg.src = "";
+
+        createPostModal.style.display = "flex";
+        postTitleInput.focus();
+    }
+
+    function closeCreatePostModal() {
+        createPostModal.style.display = "none";
+    }
+
+    openCreatePostModalBtn.addEventListener("click", openCreatePostModal);
+    if (emptyStateCreatePostBtn) emptyStateCreatePostBtn.addEventListener("click", openCreatePostModal);
+    closeCreatePostModalBtn.addEventListener("click", closeCreatePostModal);
+    cancelCreatePostBtn.addEventListener("click", closeCreatePostModal);
+
+    createPostModal.addEventListener("click", (e) => {
+        if (e.target === createPostModal) closeCreatePostModal();
+    });
+
+    postImageUploadZone.addEventListener("click", () => {
+        postImageFileInput.click();
+    });
+
+    postImageFileInput.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        if (!file.type.startsWith("image/")) {
+            alert("Please select a valid image file (JPEG, PNG, WebP, GIF).");
+            postImageFileInput.value = "";
+            return;
+        }
+
+        if (file.size > 15 * 1024 * 1024) {
+            alert("Image size exceeds 15MB limit.");
+            postImageFileInput.value = "";
+            return;
+        }
+
+        pendingPostFile = file;
+        postImagePreviewImg.src = URL.createObjectURL(file);
+        postImagePlaceholder.style.display = "none";
+        postImagePreviewContainer.style.display = "block";
+    });
+
+    removePostImageBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        pendingPostFile = null;
+        postImageFileInput.value = "";
+        postImagePreviewImg.src = "";
+        postImagePreviewContainer.style.display = "none";
+        postImagePlaceholder.style.display = "flex";
+    });
+
+    createPostForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        createPostError.style.display = "none";
+
+        if (!currentGroup) return;
+
+        const title = postTitleInput.value.trim();
+        const content = postContentInput.value.trim();
+        const externalUrl = postLinkInput.value.trim();
+        const category = postCategoryInput.value;
+        const rawTags = postTagsInput.value.trim();
+
+        if (!content && !title) {
+            createPostError.textContent = "Please provide post content or a title.";
+            createPostError.style.display = "block";
+            return;
+        }
+
+        submitCreatePostBtn.disabled = true;
+        submitCreatePostBtn.textContent = "Publishing...";
+
+        try {
+            const formData = new FormData();
+            if (title) formData.append("title", title);
+            formData.append("content", content);
+            if (externalUrl) formData.append("externalUrl", externalUrl);
+            formData.append("category", category);
+
+            if (rawTags) {
+                const tags = rawTags.split(/[\s,]+/).map(t => t.replace(/^#/, "").trim()).filter(Boolean);
+                tags.forEach(t => formData.append("tags", t));
+            }
+
+            if (pendingPostFile) {
+                formData.append("image", pendingPostFile);
+            }
+
+            const res = await fetch(`${CONFIG.API_BASE_URL}/api/communities/${currentGroup.id}/posts`, {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                },
+                body: formData
+            });
+
+            if (res.ok) {
+                closeCreatePostModal();
+                loadCommunityPosts(0, false);
+            } else {
+                const data = await res.json();
+                createPostError.textContent = data.error || "Failed to publish post.";
+                createPostError.style.display = "block";
+            }
+        } catch (err) {
+            console.error("Create post error:", err);
+            createPostError.textContent = "Network error publishing post.";
+            createPostError.style.display = "block";
+        } finally {
+            submitCreatePostBtn.disabled = false;
+            submitCreatePostBtn.textContent = "Publish Post";
+        }
+    });
+
+    // ============================================================
+    // 23. EDIT & DELETE POST WORKFLOW
+    // ============================================================
+    function openEditPostModal(post) {
+        editPostError.style.display = "none";
+        editPostId.value = post.id;
+        editPostTitleInput.value = post.title || "";
+        editPostContentInput.value = post.content || "";
+        editPostLinkInput.value = post.externalUrl || "";
+        editPostCategoryInput.value = post.category || "General";
+        editPostTagsInput.value = (post.tags || []).map(t => "#" + t).join(" ");
+
+        editPostModal.style.display = "flex";
+        editPostTitleInput.focus();
+    }
+
+    function closeEditPostModal() {
+        editPostModal.style.display = "none";
+    }
+
+    closeEditPostModalBtn.addEventListener("click", closeEditPostModal);
+    cancelEditPostBtn.addEventListener("click", closeEditPostModal);
+    editPostModal.addEventListener("click", (e) => {
+        if (e.target === editPostModal) closeEditPostModal();
+    });
+
+    editPostForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        editPostError.style.display = "none";
+
+        const postId = editPostId.value;
+        const title = editPostTitleInput.value.trim();
+        const content = editPostContentInput.value.trim();
+        const externalUrl = editPostLinkInput.value.trim();
+        const category = editPostCategoryInput.value;
+        const rawTags = editPostTagsInput.value.trim();
+
+        if (!content) {
+            editPostError.textContent = "Content cannot be empty.";
+            editPostError.style.display = "block";
+            return;
+        }
+
+        submitEditPostBtn.disabled = true;
+        submitEditPostBtn.textContent = "Saving...";
+
+        try {
+            const tags = rawTags ? rawTags.split(/[\s,]+/).map(t => t.replace(/^#/, "").trim()).filter(Boolean) : [];
+
+            const res = await apiRequest(`/api/posts/${postId}`, {
+                method: "PUT",
+                body: JSON.stringify({
+                    title,
+                    content,
+                    externalUrl,
+                    category,
+                    tags
+                })
+            });
+
+            if (res && res.ok) {
+                closeEditPostModal();
+                loadCommunityPosts(postsPage, false);
+            } else {
+                const data = await res.json();
+                editPostError.textContent = data.error || "Failed to update post.";
+                editPostError.style.display = "block";
+            }
+        } catch (err) {
+            console.error("Edit post error:", err);
+            editPostError.textContent = "Network error updating post.";
+            editPostError.style.display = "block";
+        } finally {
+            submitEditPostBtn.disabled = false;
+            submitEditPostBtn.textContent = "Save Changes";
+        }
+    });
+
+    function handleDeletePost(postId) {
+        showConfirmDialog(
+            "Delete Post",
+            "Are you sure you want to delete this post? All reactions, comments, and verifications will be permanently removed.",
+            async () => {
+                try {
+                    const res = await apiRequest(`/api/posts/${postId}`, {
+                        method: "DELETE"
+                    });
+
+                    if (res && (res.ok || res.status === 204)) {
+                        const card = document.getElementById(`post-card-${postId}`);
+                        if (card) card.remove();
+                        postsList = postsList.filter(p => p.id !== postId);
+                        if (postsList.length === 0) {
+                            postsEmptyState.style.display = "flex";
+                            postsFeedContainer.style.display = "none";
+                        }
+                    } else {
+                        const data = await res.json();
+                        alert(data.error || "Failed to delete post.");
+                    }
+                } catch (e) {
+                    console.error("Delete post error:", e);
+                    alert("Network error deleting post.");
+                }
+            }
+        );
+    }
+
+    // ============================================================
+    // 24. REPORT POST WORKFLOW
+    // ============================================================
+    function openReportPostModal(postId) {
+        reportPostError.style.display = "none";
+        reportPostId.value = postId;
+        reportReasonSelect.value = "False/misleading information";
+        reportDetailsInput.value = "";
+        reportPostModal.style.display = "flex";
+    }
+
+    function closeReportPostModal() {
+        reportPostModal.style.display = "none";
+    }
+
+    closeReportPostModalBtn.addEventListener("click", closeReportPostModal);
+    cancelReportPostBtn.addEventListener("click", closeReportPostModal);
+    reportPostModal.addEventListener("click", (e) => {
+        if (e.target === reportPostModal) closeReportPostModal();
+    });
+
+    reportPostForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        reportPostError.style.display = "none";
+
+        const postId = reportPostId.value;
+        const reason = reportReasonSelect.value;
+        const details = reportDetailsInput.value.trim();
+
+        submitReportPostBtn.disabled = true;
+        submitReportPostBtn.textContent = "Submitting...";
+
+        try {
+            const res = await apiRequest(`/api/posts/${postId}/report`, {
+                method: "POST",
+                body: JSON.stringify({ reason, details })
+            });
+
+            if (res && res.ok) {
+                closeReportPostModal();
+                alert("Thank you. Your report has been submitted to community moderators.");
+            } else {
+                const data = await res.json();
+                reportPostError.textContent = data.error || "Failed to submit report.";
+                reportPostError.style.display = "block";
+            }
+        } catch (e) {
+            console.error("Report post error:", e);
+            reportPostError.textContent = "Network error submitting report.";
+            reportPostError.style.display = "block";
+        } finally {
+            submitReportPostBtn.disabled = false;
+            submitReportPostBtn.textContent = "Submit Report";
+        }
+    });
+
+    // ============================================================
+    // 25. FULLSCREEN IMAGE LIGHTBOX
+    // ============================================================
+    function openLightbox(imageUrl) {
+        if (!imageUrl) return;
+        lightboxImage.src = imageUrl;
+        downloadLightboxBtn.href = imageUrl;
+        imageLightboxModal.style.display = "flex";
+    }
+
+    function closeLightbox() {
+        imageLightboxModal.style.display = "none";
+        lightboxImage.src = "";
+    }
+
+    closeLightboxBtn.addEventListener("click", closeLightbox);
+    imageLightboxModal.addEventListener("click", (e) => {
+        if (e.target === imageLightboxModal) closeLightbox();
+    });
+
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && imageLightboxModal.style.display === "flex") {
+            closeLightbox();
+        }
+    });
+
+    // ============================================================
+    // 26. LEAVE & DELETE GROUP CONFIRMATIONS
     // ============================================================
     function showConfirmDialog(title, message, onProceed) {
         confirmModalTitle.textContent = title;
@@ -1250,7 +2750,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (e.target === confirmActionModal) closeConfirmDialog();
     });
 
-    // Leave Group Handler
     function handleLeaveCurrentGroup() {
         if (!currentGroup) return;
 
@@ -1285,13 +2784,12 @@ document.addEventListener("DOMContentLoaded", () => {
         );
     }
 
-    // Delete Group Handler (Admin Only)
     function handleDeleteCurrentGroup() {
         if (!currentGroup || !currentGroup.admin) return;
 
         showConfirmDialog(
             "Delete Group",
-            `Are you sure you want to permanently delete "${currentGroup.name}" and all of its messages? This action cannot be undone.`,
+            `Are you sure you want to permanently delete "${currentGroup.name}" and all of its messages and posts? This action cannot be undone.`,
             async () => {
                 try {
                     const res = await apiRequest(`/api/groups/${currentGroup.id}`, {
@@ -1325,7 +2823,6 @@ document.addEventListener("DOMContentLoaded", () => {
         handleDeleteCurrentGroup();
     });
 
-    // 3-dot Menu item actions
     menuItemOpenInfo.addEventListener("click", () => {
         groupDropdownMenu.style.display = "none";
         openInfoDrawer();
@@ -1350,7 +2847,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // ============================================================
-    // 15. DROPDOWN MENUS & LOGOUT
+    // 27. USER MENU & LOGOUT
     // ============================================================
     userMenuBtn.addEventListener("click", (e) => {
         e.stopPropagation();
