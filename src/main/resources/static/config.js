@@ -16,18 +16,18 @@ const CONFIG = {
         if (window.WS_URL) return window.WS_URL;
         if (localStorage.getItem("unihive_ws_url")) return localStorage.getItem("unihive_ws_url");
 
-        // Render / HTTPS deployment: connect directly to domain without port
+        // Render / HTTPS deployment: connect to /ws on same domain
         if (window.location.hostname.includes("onrender.com") || window.location.protocol === "https:") {
-            return `wss://${window.location.host}`;
+            return `wss://${window.location.host}/ws`;
         }
 
-        // Local development: connect to ws://localhost:8887
+        // Local development: connect to Spring Boot on port 8080
         if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || !window.location.hostname) {
-            return "ws://localhost:8887";
+            return "ws://localhost:8080/ws";
         }
 
         const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-        const host = window.location.host || "localhost:8887";
-        return `${protocol}//${host}`;
+        const host = window.location.host || "localhost:8080";
+        return `${protocol}//${host}/ws`;
     }
 };
