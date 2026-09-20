@@ -2467,9 +2467,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Community Verification Gauge HTML
         const totalVerifications = post.totalVerifications || 0;
-        const verifiedPercent = post.verifiedPercent || 0;
-        const notVerifiedPercent = post.notVerifiedPercent || 0;
+        const verifiedPercent = totalVerifications > 0 ? (post.verifiedPercent || 0) : 0;
+        const notVerifiedPercent = totalVerifications > 0 ? (post.notVerifiedPercent || 0) : 0;
         const userVerdict = post.userVerification;
+
+        let statusBadgeHtml = "";
+        if (totalVerifications === 0) {
+            statusBadgeHtml = `<span class="verification-status-badge status-unverified">Unverified</span>`;
+        } else if (verifiedPercent >= 70) {
+            statusBadgeHtml = `<span class="verification-status-badge status-verified">✓ Verified</span>`;
+        } else if (notVerifiedPercent >= 70) {
+            statusBadgeHtml = `<span class="verification-status-badge status-disproved">✕ Disproved</span>`;
+        } else {
+            statusBadgeHtml = `<span class="verification-status-badge status-disputed">⚡ Disputed</span>`;
+        }
 
         const verificationGaugeHtml = `
             <div class="community-verification-block" id="verification-gauge-${post.id}">
@@ -2479,6 +2490,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
                         </svg>
                         <strong>Community Verification</strong>
+                        ${statusBadgeHtml}
                     </div>
                     <button type="button" class="btn-view-verifications" data-post-id="${post.id}">
                         ${totalVerifications} ${totalVerifications === 1 ? 'assessment' : 'assessments'} · Details
@@ -2486,8 +2498,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
 
                 <div class="verification-track" title="Verified: ${verifiedPercent}%, Not Verified: ${notVerifiedPercent}%">
-                    <div class="verification-bar-true" style="width: ${verifiedPercent}%;"></div>
-                    <div class="verification-bar-false" style="width: ${notVerifiedPercent}%;"></div>
+                    <div class="verification-bar-true" style="width: ${totalVerifications > 0 ? verifiedPercent : 0}%;"></div>
+                    <div class="verification-bar-false" style="width: ${totalVerifications > 0 ? notVerifiedPercent : 0}%;"></div>
                 </div>
 
                 <div class="verification-labels-row">
@@ -3020,8 +3032,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!gaugeEl) return;
 
         const totalVerifications = result.totalVerifications || 0;
-        const verifiedPercent = result.verifiedPercent || 0;
-        const notVerifiedPercent = result.notVerifiedPercent || 0;
+        const verifiedPercent = totalVerifications > 0 ? (result.verifiedPercent || 0) : 0;
+        const notVerifiedPercent = totalVerifications > 0 ? (result.notVerifiedPercent || 0) : 0;
         const userVerdict = result.userVerification;
 
         const detailsBtn = gaugeEl.querySelector(".btn-view-verifications");
@@ -3029,10 +3041,34 @@ document.addEventListener("DOMContentLoaded", () => {
             detailsBtn.textContent = `${totalVerifications} ${totalVerifications === 1 ? 'assessment' : 'assessments'} · Details`;
         }
 
+        let badgeEl = gaugeEl.querySelector(".verification-status-badge");
+        if (!badgeEl) {
+            badgeEl = document.createElement("span");
+            badgeEl.className = "verification-status-badge";
+            const titleRow = gaugeEl.querySelector(".gauge-title-row");
+            if (titleRow) titleRow.appendChild(badgeEl);
+        }
+        if (badgeEl) {
+            badgeEl.className = "verification-status-badge";
+            if (totalVerifications === 0) {
+                badgeEl.classList.add("status-unverified");
+                badgeEl.textContent = "Unverified";
+            } else if (verifiedPercent >= 70) {
+                badgeEl.classList.add("status-verified");
+                badgeEl.textContent = "✓ Verified";
+            } else if (notVerifiedPercent >= 70) {
+                badgeEl.classList.add("status-disproved");
+                badgeEl.textContent = "✕ Disproved";
+            } else {
+                badgeEl.classList.add("status-disputed");
+                badgeEl.textContent = "⚡ Disputed";
+            }
+        }
+
         const barTrue = gaugeEl.querySelector(".verification-bar-true");
         const barFalse = gaugeEl.querySelector(".verification-bar-false");
-        if (barTrue) barTrue.style.width = `${verifiedPercent}%`;
-        if (barFalse) barFalse.style.width = `${notVerifiedPercent}%`;
+        if (barTrue) barTrue.style.width = `${totalVerifications > 0 ? verifiedPercent : 0}%`;
+        if (barFalse) barFalse.style.width = `${totalVerifications > 0 ? notVerifiedPercent : 0}%`;
 
         const lblVerified = gaugeEl.querySelector(".label-verified");
         const lblNotVerified = gaugeEl.querySelector(".label-not-verified");
