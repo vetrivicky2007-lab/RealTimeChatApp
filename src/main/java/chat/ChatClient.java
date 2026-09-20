@@ -9,7 +9,7 @@ import org.java_websocket.handshake.ServerHandshake;
 public class ChatClient extends WebSocketClient {
 
     public static final String LOCAL_WS_URL = "ws://localhost:8887";
-    public static final String RENDER_WS_URL = "wss://realtimechatapp-2-wmp5.onrender.com/ws";
+    public static final String RENDER_WS_URL = "wss://realtimechatapp-2-wmp5.onrender.com";
 
     public ChatClient(URI serverUri) {
         super(serverUri);
