@@ -13,10 +13,11 @@ RUN mvn clean package -DskipTests
 
 # Runtime image
 FROM eclipse-temurin:21-jre
+
 WORKDIR /app
+
 COPY --from=build /app/target/*.jar app.jar
 
-ENV PORT=8080
-EXPOSE 8080
+EXPOSE 10000
 
-ENTRYPOINT ["sh", "-c", "java -Dserver.port=${PORT} -jar app.jar"]
+CMD ["java", "-jar", "app.jar"]

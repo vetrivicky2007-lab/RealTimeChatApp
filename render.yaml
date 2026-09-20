@@ -3,8 +3,10 @@ services:
     name: unihive
     runtime: java
     buildCommand: mvn clean package -DskipTests
-    startCommand: java -Dserver.port=$PORT -jar target/unihive-1.0.0.jar
+    startCommand: java -jar target/unihive-1.0.0.jar
     envVars:
+      - key: SPRING_DATA_MONGODB_URI
+        sync: false
       - key: MONGODB_URI
         sync: false
       - key: JWT_SECRET

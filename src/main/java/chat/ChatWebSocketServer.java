@@ -17,6 +17,10 @@ public class ChatWebSocketServer extends WebSocketServer {
         super(new InetSocketAddress(port));
     }
 
+    public ChatWebSocketServer(InetSocketAddress address) {
+        super(address);
+    }
+
     @Override
     public void onOpen(
             WebSocket conn,
@@ -99,20 +103,19 @@ public class ChatWebSocketServer extends WebSocketServer {
 
     @Override
     public void onStart() {
-
         System.out.println(
-                "WebSocket Server started on port 8080");
+                "WebSocket Server started on " + getAddress());
     }
 
-  public static void main(String[] args) {
+    public static void main(String[] args) {
+        String portEnv = System.getenv("PORT");
+        int wsPort = (portEnv != null && !portEnv.isBlank())
+                ? Integer.parseInt(portEnv.trim())
+                : 8887;
 
-    int port = Integer.parseInt(
-        System.getenv().getOrDefault("PORT", "8080")
-    );
-
-    ChatWebSocketServer server =
-        new ChatWebSocketServer(port);
-
-    server.start();
-}
+        InetSocketAddress address = new InetSocketAddress("0.0.0.0", wsPort);
+        ChatWebSocketServer server = new ChatWebSocketServer(address);
+        server.start();
+        System.out.println("UniHive WebSocket server started on 0.0.0.0:" + wsPort);
+    }
 }
