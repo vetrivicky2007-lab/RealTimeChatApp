@@ -359,22 +359,45 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // ============================================================
-    // SIDEBAR COLLAPSE TOGGLE
+    // SIDEBAR COLLAPSE TOGGLE & RAIL (ChatGPT style)
     // ============================================================
     const sidebarCollapseBtn = document.getElementById("sidebarCollapseBtn");
+    const railSearchBtn = document.getElementById("railSearchBtn");
     const messengerLayout = document.querySelector(".messenger-layout");
-    
-    if (sidebarCollapseBtn && messengerLayout) {
+
+    function updateSidebarToggleTooltip() {
+        if (!sidebarCollapseBtn || !leftSidebar) return;
+        const isCollapsed = leftSidebar.classList.contains("collapsed");
+        sidebarCollapseBtn.setAttribute("title", isCollapsed ? "Open sidebar" : "Close sidebar");
+        sidebarCollapseBtn.setAttribute("aria-label", isCollapsed ? "Open sidebar" : "Close sidebar");
+    }
+
+    if (sidebarCollapseBtn && leftSidebar) {
         // Restore state from sessionStorage
         if (sessionStorage.getItem("unihive_sidebar_collapsed") === "true") {
             leftSidebar.classList.add("collapsed");
-            messengerLayout.classList.add("sidebar-collapsed");
+            if (messengerLayout) messengerLayout.classList.add("sidebar-collapsed");
         }
+        updateSidebarToggleTooltip();
+
         sidebarCollapseBtn.addEventListener("click", () => {
             leftSidebar.classList.toggle("collapsed");
-            messengerLayout.classList.toggle("sidebar-collapsed");
+            if (messengerLayout) messengerLayout.classList.toggle("sidebar-collapsed");
+            updateSidebarToggleTooltip();
             sessionStorage.setItem("unihive_sidebar_collapsed",
                 leftSidebar.classList.contains("collapsed") ? "true" : "false");
+        });
+    }
+
+    if (railSearchBtn && leftSidebar) {
+        railSearchBtn.addEventListener("click", () => {
+            leftSidebar.classList.remove("collapsed");
+            if (messengerLayout) messengerLayout.classList.remove("sidebar-collapsed");
+            updateSidebarToggleTooltip();
+            sessionStorage.setItem("unihive_sidebar_collapsed", "false");
+            setTimeout(() => {
+                if (groupSearchInput) groupSearchInput.focus();
+            }, 100);
         });
     }
 
@@ -1321,7 +1344,10 @@ document.addEventListener("DOMContentLoaded", () => {
         joinPrivateModal.style.display = "none";
     }
 
-    openJoinPrivateModalBtn.addEventListener("click", () => openJoinPrivateModal(null));
+    openJoinPrivateModalBtn.addEventListener("click", () => {
+        if (userDropdownMenu) userDropdownMenu.style.display = "none";
+        openJoinPrivateModal(null);
+    });
     closeJoinPrivateModalBtn.addEventListener("click", closeJoinPrivateModal);
     cancelJoinPrivateModalBtn.addEventListener("click", closeJoinPrivateModal);
 
@@ -1426,6 +1452,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // 7. CREATE GROUP WORKFLOW
     // ============================================================
     openCreateModalBtn.addEventListener("click", () => {
+        if (userDropdownMenu) userDropdownMenu.style.display = "none";
         createGroupError.style.display = "none";
         newGroupName.value = "";
         newGroupDesc.value = "";
@@ -1522,6 +1549,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Update Right Drawer details
         updateDrawerDetails(group);
+
+        // Open Group Information panel by default on desktop
+        if (window.innerWidth >= 900) {
+            openInfoDrawer();
+        } else {
+            closeInfoDrawer();
+        }
 
         // Messages placeholder
         messagesList.innerHTML = `<div class="list-placeholder-state"><div class="loading-spinner"></div><span>Loading messages...</span></div>`;
@@ -1645,10 +1679,17 @@ document.addEventListener("DOMContentLoaded", () => {
         drawerGroupAvatar.textContent = initial;
         drawerGroupName.textContent = group.name;
         drawerGroupDesc.textContent = group.description || "No description provided.";
-        drawerPrivacyBadge.textContent = group.privacy === "PRIVATE" ? "🔒 Private Hive" : "🌐 Public Group";
+        const isPrivate = group.privacy === "PRIVATE";
+        drawerPrivacyBadge.textContent = isPrivate ? "🔒 Private Hive" : "🌐 Public Group";
         drawerMembersCount.textContent = `${group.memberCount} members`;
 
-        const isPrivate = group.privacy === "PRIVATE";
+        const drawerDetailPrivacy = document.getElementById("drawerDetailPrivacy");
+        const drawerDetailCreated = document.getElementById("drawerDetailCreated");
+        const drawerDetailMembers = document.getElementById("drawerDetailMembers");
+        if (drawerDetailPrivacy) drawerDetailPrivacy.textContent = isPrivate ? "Private" : "Public";
+        if (drawerDetailCreated) drawerDetailCreated.textContent = formatRelativeTime(group.createdAt || Date.now());
+        if (drawerDetailMembers) drawerDetailMembers.textContent = `${group.memberCount || 1}`;
+
         if (isPrivate && (group.member || group.admin) && group.inviteCode) {
             drawerInviteSection.style.display = "block";
             drawerInviteCode.textContent = group.inviteCode;
@@ -2315,6 +2356,49 @@ document.addEventListener("DOMContentLoaded", () => {
         if (newPostsDot) newPostsDot.style.display = "none";
         loadCommunityPosts(0, false);
     });
+
+    // Community Posts Three-Dot Action Menu
+    const postsMenuBtn = document.getElementById("postsMenuBtn");
+    const postsDropdownMenu = document.getElementById("postsDropdownMenu");
+    const feedMenuItemGuidelines = document.getElementById("feedMenuItemGuidelines");
+    const feedMenuItemSaved = document.getElementById("feedMenuItemSaved");
+    const feedMenuItemRefresh = document.getElementById("feedMenuItemRefresh");
+
+    if (postsMenuBtn && postsDropdownMenu) {
+        postsMenuBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            postsDropdownMenu.style.display = postsDropdownMenu.style.display === "none" ? "block" : "none";
+        });
+
+        document.addEventListener("click", (e) => {
+            if (!postsMenuBtn.contains(e.target) && !postsDropdownMenu.contains(e.target)) {
+                postsDropdownMenu.style.display = "none";
+            }
+        });
+    }
+
+    if (feedMenuItemGuidelines) {
+        feedMenuItemGuidelines.addEventListener("click", () => {
+            if (postsDropdownMenu) postsDropdownMenu.style.display = "none";
+            openInfoDrawer();
+        });
+    }
+
+    if (feedMenuItemSaved) {
+        feedMenuItemSaved.addEventListener("click", () => {
+            if (postsDropdownMenu) postsDropdownMenu.style.display = "none";
+            openSavedPostsModal();
+        });
+    }
+
+    if (feedMenuItemRefresh) {
+        feedMenuItemRefresh.addEventListener("click", () => {
+            if (postsDropdownMenu) postsDropdownMenu.style.display = "none";
+            if (newPostsBanner) newPostsBanner.style.display = "none";
+            if (newPostsDot) newPostsDot.style.display = "none";
+            loadCommunityPosts(0, false);
+        });
+    }
 
     newPostsBanner.addEventListener("click", () => {
         newPostsBanner.style.display = "none";
@@ -3064,7 +3148,10 @@ document.addEventListener("DOMContentLoaded", () => {
         createPostModal.style.display = "none";
     }
 
-    openCreatePostModalBtn.addEventListener("click", openCreatePostModal);
+    openCreatePostModalBtn.addEventListener("click", () => {
+        if (postsDropdownMenu) postsDropdownMenu.style.display = "none";
+        openCreatePostModal();
+    });
     if (emptyStateCreatePostBtn) emptyStateCreatePostBtn.addEventListener("click", openCreatePostModal);
     closeCreatePostModalBtn.addEventListener("click", closeCreatePostModal);
     cancelCreatePostBtn.addEventListener("click", closeCreatePostModal);
