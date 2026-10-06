@@ -182,43 +182,43 @@ public class DataSeeder implements ApplicationRunner {
                 new GroupDefinition(
                         "AI & Machine Learning Innovators",
                         "A collaborative hub for AI researchers, ML engineers, and curious minds. We share breakthroughs in Large Language Models (LLMs), neural architectures, diffusion models, reinforcement learning, and open-source AI tooling. Discuss papers, benchmark models, and explore ethical AI implementations.",
-                        "https://images.unsplash.com/photo-1677442136019-21780efad99a?auto=format&fit=crop&w=800&q=80",
+                        "data:image/svg+xml;utf8,<svg viewBox='0 0 64 64' fill='none' xmlns='http://www.w3.org/2000/svg'><rect width='64' height='64' rx='14' fill='%231e1b4b'/><circle cx='32' cy='32' r='14' stroke='%23a78bfa' stroke-width='2' stroke-dasharray='3 3'/><circle cx='32' cy='32' r='7' fill='%238b5cf6'/><circle cx='32' cy='18' r='3' fill='%2338bdf8'/><circle cx='44' cy='26' r='3' fill='%2338bdf8'/><circle cx='44' cy='38' r='3' fill='%2338bdf8'/><circle cx='32' cy='46' r='3' fill='%2338bdf8'/><circle cx='20' cy='38' r='3' fill='%2338bdf8'/><circle cx='20' cy='26' r='3' fill='%2338bdf8'/><path d='M32 25V18M37 28L44 26M37 36L44 38M32 39V46M27 36L20 38M27 28L20 26' stroke='%23c084fc' stroke-width='1.8'/></svg>",
                         "Artificial Intelligence"
                 ),
                 new GroupDefinition(
                         "CodeCraft: Software & Architecture",
                         "The gathering place for engineers who care about craft, scalability, and system design. Discuss modern backend services, TypeScript and Rust patterns, clean code principles, database indexing strategies, distributed consensus, and developer productivity tools.",
-                        "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=800&q=80",
+                        "data:image/svg+xml;utf8,<svg viewBox='0 0 64 64' fill='none' xmlns='http://www.w3.org/2000/svg'><rect width='64' height='64' rx='14' fill='%23064e3b'/><rect x='13' y='15' width='38' height='34' rx='6' stroke='%2334d399' stroke-width='2' fill='%23022c22'/><path d='M22 28L17 32L22 36' stroke='%2310b981' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/><path d='M42 28L47 32L42 36' stroke='%2310b981' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/><path d='M34 25L30 39' stroke='%236ee7b7' stroke-width='2.2' stroke-linecap='round'/></svg>",
                         "Programming"
                 ),
                 new GroupDefinition(
                         "PixelRealm: Gaming & Esports",
                         "Dedicated to gaming culture, indie discoveries, competitive esports, and next-gen hardware. Share game reviews, gameplay tips, custom PC build setups, speedrunning highlights, and industry news from both AAA studios and passionate indie developers.",
-                        "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80",
+                        "data:image/svg+xml;utf8,<svg viewBox='0 0 64 64' fill='none' xmlns='http://www.w3.org/2000/svg'><rect width='64' height='64' rx='14' fill='%232e1065'/><path d='M16 26C16 23.79 17.79 22 20 22H44C46.21 22 48 23.79 48 26V36C48 40.42 44.42 44 40 44L35 39H29L24 44C19.58 44 16 40.42 16 36V26Z' fill='%233b0764' stroke='%23ec4899' stroke-width='2'/><path d='M22 30V36M19 33H25' stroke='%23f472b6' stroke-width='2.2' stroke-linecap='round'/><circle cx='42' cy='30' r='1.8' fill='%2338bdf8'/><circle cx='45' cy='33' r='1.8' fill='%23fbbf24'/><circle cx='39' cy='33' r='1.8' fill='%23a78bfa'/><circle cx='42' cy='36' r='1.8' fill='%2334d399'/></svg>",
                         "Gaming"
                 ),
                 new GroupDefinition(
                         "CineVerse: Cinema & Storytelling",
                         "A vibrant space for cinephiles, screenwriters, and movie enthusiasts. From deep narrative analyses and cinematography dissections to indie film recommendations, festival retrospectives, and discussions on the golden age of cinema and television.",
-                        "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=800&q=80",
+                        "data:image/svg+xml;utf8,<svg viewBox='0 0 64 64' fill='none' xmlns='http://www.w3.org/2000/svg'><rect width='64' height='64' rx='14' fill='%23451a03'/><circle cx='32' cy='32' r='17' stroke='%23f59e0b' stroke-width='2.2' fill='%231c0d02'/><circle cx='32' cy='32' r='5' stroke='%23f59e0b' stroke-width='1.8' fill='%231c0d02'/><circle cx='32' cy='20' r='2.5' fill='%23fbbf24'/><circle cx='42.4' cy='26' r='2.5' fill='%23fbbf24'/><circle cx='42.4' cy='38' r='2.5' fill='%23fbbf24'/><circle cx='32' cy='44' r='2.5' fill='%23fbbf24'/><circle cx='21.6' cy='38' r='2.5' fill='%23fbbf24'/><circle cx='21.6' cy='26' r='2.5' fill='%23fbbf24'/></svg>",
                         "Entertainment"
                 ),
                 new GroupDefinition(
                         "ShutterCraft: Photography & Visuals",
                         "An inspiring collective of street, portrait, landscape, and astrophotographers. Share RAW camera settings, post-processing techniques in Lightroom and Capture One, lens recommendations, lighting setups, and your visual storytelling portfolios.",
-                        "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=800&q=80",
+                        "data:image/svg+xml;utf8,<svg viewBox='0 0 64 64' fill='none' xmlns='http://www.w3.org/2000/svg'><rect width='64' height='64' rx='14' fill='%230c4a6e'/><circle cx='32' cy='32' r='18' stroke='%2338bdf8' stroke-width='2.2' fill='%23082f49'/><circle cx='32' cy='32' r='8' stroke='%237dd3fc' stroke-width='1.8' fill='%230c4a6e'/><path d='M32 14L40 23M49 26L45 37M44 46L33 46M25 47L19 39M15 31L21 21M24 15L32 23' stroke='%2338bdf8' stroke-width='1.6' stroke-linecap='round'/><circle cx='34' cy='30' r='2' fill='%23ffffff'/></svg>",
                         "Photography"
                 ),
                 new GroupDefinition(
                         "VentureForge: Startups & Builders",
                         "For founders, operators, bootstrappers, and venture builders turning ideas into sustainable businesses. Discuss product-market fit, customer discovery interviews, pricing strategies, SaaS unit economics, pitch decks, and bootstrapping versus venture funding.",
-                        "https://images.unsplash.com/photo-1559136555-9303baea8ebd?auto=format&fit=crop&w=800&q=80",
+                        "data:image/svg+xml;utf8,<svg viewBox='0 0 64 64' fill='none' xmlns='http://www.w3.org/2000/svg'><rect width='64' height='64' rx='14' fill='%237c2d12'/><path d='M32 14C32 14 42 22 42 34C42 37 40 40 40 40L32 37L24 40C24 40 22 37 22 34C22 22 32 14 32 14Z' fill='%23ea580c' stroke='%23f97316' stroke-width='2' stroke-linejoin='round'/><circle cx='32' cy='27' r='3' fill='%23fef08a'/><path d='M22 35L17 41L24 40' fill='%23c2410c'/><path d='M42 35L47 41L40 40' fill='%23c2410c'/><path d='M28 42L32 49L36 42' stroke='%23fdba74' stroke-width='2' stroke-linecap='round'/></svg>",
                         "Startups"
                 ),
                 new GroupDefinition(
                         "TechPulse: Gadgets & Future Tech",
                         "The hub for hardware enthusiasts, mobile innovators, and futuristic consumer tech. We review the latest silicon innovations, foldable smartphones, smart home automation setups, wearable health sensors, VR/AR headsets, and emerging energy tech.",
-                        "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80",
+                        "data:image/svg+xml;utf8,<svg viewBox='0 0 64 64' fill='none' xmlns='http://www.w3.org/2000/svg'><rect width='64' height='64' rx='14' fill='%23172554'/><rect x='20' y='20' width='24' height='24' rx='4' stroke='%2360a5fa' stroke-width='2' fill='%231e3a8a'/><rect x='26' y='26' width='12' height='12' rx='2' fill='%233b82f6'/><path d='M26 14V20M32 14V20M38 14V20M26 44V50M32 44V50M38 44V50M14 26H20M14 32H20M14 38H20M44 26H50M44 32H50M44 38H50' stroke='%2393c5fd' stroke-width='1.8' stroke-linecap='round'/></svg>",
                         "Technology"
                 )
         );

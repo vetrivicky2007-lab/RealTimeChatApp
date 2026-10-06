@@ -1226,31 +1226,186 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // ============================================================
+    // COMMUNITY BRAND LOGOS & IDENTITY (Professional SVG Marks)
+    // ============================================================
+    const COMMUNITY_BRAND_LOGOS = {
+        ai: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="64" height="64" rx="14" fill="url(#bg-ai)"/>
+            <circle cx="32" cy="32" r="14" stroke="#a78bfa" stroke-width="2" stroke-dasharray="3 3"/>
+            <circle cx="32" cy="32" r="7" fill="#8b5cf6"/>
+            <circle cx="32" cy="18" r="3" fill="#38bdf8"/>
+            <circle cx="44" cy="26" r="3" fill="#38bdf8"/>
+            <circle cx="44" cy="38" r="3" fill="#38bdf8"/>
+            <circle cx="32" cy="46" r="3" fill="#38bdf8"/>
+            <circle cx="20" cy="38" r="3" fill="#38bdf8"/>
+            <circle cx="20" cy="26" r="3" fill="#38bdf8"/>
+            <path d="M32 25V18M37 28L44 26M37 36L44 38M32 39V46M27 36L20 38M27 28L20 26" stroke="#c084fc" stroke-width="1.8"/>
+            <defs>
+                <linearGradient id="bg-ai" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#1e1b4b"/>
+                    <stop offset="1" stop-color="#0f172a"/>
+                </linearGradient>
+            </defs>
+        </svg>`,
+        code: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="64" height="64" rx="14" fill="url(#bg-code)"/>
+            <rect x="13" y="15" width="38" height="34" rx="6" stroke="#34d399" stroke-width="2" fill="#064e3b" fill-opacity="0.35"/>
+            <path d="M22 28L17 32L22 36" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M42 28L47 32L42 36" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M34 25L30 39" stroke="#6ee7b7" stroke-width="2.2" stroke-linecap="round"/>
+            <defs>
+                <linearGradient id="bg-code" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#064e3b"/>
+                    <stop offset="1" stop-color="#022c22"/>
+                </linearGradient>
+            </defs>
+        </svg>`,
+        gaming: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="64" height="64" rx="14" fill="url(#bg-game)"/>
+            <path d="M16 26C16 23.7909 17.7909 22 20 22H44C46.2091 22 48 23.7909 48 26V36C48 40.4183 44.4183 44 40 44L35 39H29L24 44C19.5817 44 16 40.4183 16 36V26Z" fill="#3b0764" stroke="#ec4899" stroke-width="2"/>
+            <path d="M22 30V36M19 33H25" stroke="#f472b6" stroke-width="2.2" stroke-linecap="round"/>
+            <circle cx="42" cy="30" r="1.8" fill="#38bdf8"/>
+            <circle cx="45" cy="33" r="1.8" fill="#fbbf24"/>
+            <circle cx="39" cy="33" r="1.8" fill="#a78bfa"/>
+            <circle cx="42" cy="36" r="1.8" fill="#34d399"/>
+            <defs>
+                <linearGradient id="bg-game" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#2e1065"/>
+                    <stop offset="1" stop-color="#170638"/>
+                </linearGradient>
+            </defs>
+        </svg>`,
+        cinema: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="64" height="64" rx="14" fill="url(#bg-cine)"/>
+            <circle cx="32" cy="32" r="17" stroke="#f59e0b" stroke-width="2.2" fill="#451a03" fill-opacity="0.35"/>
+            <circle cx="32" cy="32" r="5" stroke="#f59e0b" stroke-width="1.8" fill="#1c0d02"/>
+            <circle cx="32" cy="20" r="2.5" fill="#fbbf24"/>
+            <circle cx="42.4" cy="26" r="2.5" fill="#fbbf24"/>
+            <circle cx="42.4" cy="38" r="2.5" fill="#fbbf24"/>
+            <circle cx="32" cy="44" r="2.5" fill="#fbbf24"/>
+            <circle cx="21.6" cy="38" r="2.5" fill="#fbbf24"/>
+            <circle cx="21.6" cy="26" r="2.5" fill="#fbbf24"/>
+            <defs>
+                <linearGradient id="bg-cine" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#451a03"/>
+                    <stop offset="1" stop-color="#1f0a00"/>
+                </linearGradient>
+            </defs>
+        </svg>`,
+        photo: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="64" height="64" rx="14" fill="url(#bg-photo)"/>
+            <circle cx="32" cy="32" r="18" stroke="#38bdf8" stroke-width="2.2" fill="#082f49" fill-opacity="0.35"/>
+            <circle cx="32" cy="32" r="8" stroke="#7dd3fc" stroke-width="1.8" fill="#0c4a6e"/>
+            <path d="M32 14L40 23M49 26L45 37M44 46L33 46M25 47L19 39M15 31L21 21M24 15L32 23" stroke="#38bdf8" stroke-width="1.6" stroke-linecap="round"/>
+            <circle cx="34" cy="30" r="2" fill="#ffffff" fill-opacity="0.9"/>
+            <defs>
+                <linearGradient id="bg-photo" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#0c4a6e"/>
+                    <stop offset="1" stop-color="#031f33"/>
+                </linearGradient>
+            </defs>
+        </svg>`,
+        startup: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="64" height="64" rx="14" fill="url(#bg-startup)"/>
+            <path d="M32 14C32 14 42 22 42 34C42 37 40 40 40 40L32 37L24 40C24 40 22 37 22 34C22 22 32 14 32 14Z" fill="#ea580c" stroke="#f97316" stroke-width="2" stroke-linejoin="round"/>
+            <circle cx="32" cy="27" r="3" fill="#fef08a"/>
+            <path d="M22 35L17 41L24 40" fill="#c2410c"/>
+            <path d="M42 35L47 41L40 40" fill="#c2410c"/>
+            <path d="M28 42L32 49L36 42" stroke="#fdba74" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <defs>
+                <linearGradient id="bg-startup" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#7c2d12"/>
+                    <stop offset="1" stop-color="#2a0d04"/>
+                </linearGradient>
+            </defs>
+        </svg>`,
+        tech: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="64" height="64" rx="14" fill="url(#bg-tech)"/>
+            <rect x="20" y="20" width="24" height="24" rx="4" stroke="#60a5fa" stroke-width="2" fill="#1e3a8a" fill-opacity="0.35"/>
+            <rect x="26" y="26" width="12" height="12" rx="2" fill="#3b82f6"/>
+            <path d="M26 14V20M32 14V20M38 14V20M26 44V50M32 44V50M38 44V50M14 26H20M14 32H20M14 38H20M44 26H50M44 32H50M44 38H50" stroke="#93c5fd" stroke-width="1.8" stroke-linecap="round"/>
+            <defs>
+                <linearGradient id="bg-tech" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#172554"/>
+                    <stop offset="1" stop-color="#0a1228"/>
+                </linearGradient>
+            </defs>
+        </svg>`
+    };
+
+    function getCommunityBrandKey(group) {
+        if (!group) return null;
+        const name = (group.name || "").toLowerCase();
+        if (name.includes("machine learning") || name.includes("ai &") || name.includes("intelligence")) return "ai";
+        if (name.includes("codecraft") || name.includes("software") || name.includes("architecture")) return "code";
+        if (name.includes("pixelrealm") || name.includes("gaming") || name.includes("esport")) return "gaming";
+        if (name.includes("cineverse") || name.includes("cinema") || name.includes("storytelling") || name.includes("movie")) return "cinema";
+        if (name.includes("shuttercraft") || name.includes("photography") || name.includes("visuals")) return "photo";
+        if (name.includes("ventureforge") || name.includes("startup") || name.includes("builder")) return "startup";
+        if (name.includes("techpulse") || name.includes("gadget") || name.includes("future tech")) return "tech";
+        return null;
+    }
+
+    function getCommunityLogoHtml(group, className = "group-item-avatar") {
+        const brandKey = getCommunityBrandKey(group);
+        if (brandKey && COMMUNITY_BRAND_LOGOS[brandKey]) {
+            return `<div class="${className}">${COMMUNITY_BRAND_LOGOS[brandKey]}</div>`;
+        }
+        if (group && group.avatarUrl && !group.avatarUrl.includes("images.unsplash.com")) {
+            return `<div class="${className}"><img src="${escapeHtml(group.avatarUrl)}" alt="${escapeHtml(group.name || 'G')}"></div>`;
+        }
+        const initial = ((group && group.name) || "G").charAt(0).toUpperCase();
+        return `<div class="${className}">${initial}</div>`;
+    }
+
+    function getShortGroupSummary(group) {
+        if (!group) return "";
+        const name = (group.name || "").toLowerCase();
+        if (name.includes("machine learning") || name.includes("ai &") || name.includes("intelligence")) {
+            return "Explore AI, ML, and emerging intelligent systems.";
+        }
+        if (name.includes("codecraft") || name.includes("software") || name.includes("architecture")) {
+            return "Clean code, distributed architecture, and developer craft.";
+        }
+        if (name.includes("pixelrealm") || name.includes("gaming") || name.includes("esport")) {
+            return "Gaming discussions, reviews, and competitive esports.";
+        }
+        if (name.includes("cineverse") || name.includes("cinema") || name.includes("storytelling") || name.includes("movie")) {
+            return "Deep cinema analysis, screenwriting, and film discussions.";
+        }
+        if (name.includes("shuttercraft") || name.includes("photography") || name.includes("visuals")) {
+            return "Visual storytelling, camera gear, and photo techniques.";
+        }
+        if (name.includes("ventureforge") || name.includes("startup") || name.includes("builder")) {
+            return "Startup playbooks, product-market fit, and SaaS growth.";
+        }
+        if (name.includes("techpulse") || name.includes("gadget") || name.includes("future tech")) {
+            return "Gadgets, hardware, and future technology.";
+        }
+        if (group.description) {
+            const firstSentence = group.description.split(/[.!?]/)[0].trim();
+            if (firstSentence && firstSentence.length <= 75) {
+                return firstSentence + ".";
+            }
+            return group.description.substring(0, 65).trim() + "...";
+        }
+        return "Connect and collaborate with community members.";
+    }
+
     function renderMyGroupItem(group) {
         const item = document.createElement("div");
         item.className = `group-item ${currentGroup && currentGroup.id === group.id ? 'active' : ''}`;
         item.setAttribute("data-group-id", group.id);
 
-        const initial = (group.name || "G").charAt(0).toUpperCase();
-        const isPrivate = group.privacy === "PRIVATE";
-        const isAdmin = group.admin;
-        const avatarHtml = group.avatarUrl
-            ? `<div class="group-item-avatar" style="background-image: url('${escapeHtml(group.avatarUrl)}'); background-size: cover; background-position: center; color: transparent;"></div>`
-            : `<div class="group-item-avatar">${initial}</div>`;
+        const logoHtml = getCommunityLogoHtml(group, "group-item-avatar");
+        const shortDesc = getShortGroupSummary(group);
 
         item.innerHTML = `
-            ${avatarHtml}
+            ${logoHtml}
             <div class="group-item-content">
-                <div class="group-item-header">
-                    <span class="group-item-title">${escapeHtml(group.name)}</span>
-                    <span class="group-item-time">${formatTimeShort(group.updatedAt || group.createdAt)}</span>
-                </div>
-                <p class="group-item-preview">${escapeHtml(group.description || "No recent activity")}</p>
-                <div class="group-item-meta">
-                    <span class="privacy-pill-micro">${isPrivate ? '🔒 Private' : '🌐 Public'}</span>
-                    ${isAdmin ? '<span class="admin-tag-micro">Admin</span>' : ''}
-                    <span style="font-size: 11px; color: var(--text-muted); margin-left: auto;">${group.memberCount} members</span>
-                </div>
+                <span class="group-item-name" title="${escapeHtml(group.name)}">${escapeHtml(group.name)}</span>
+                <p class="group-item-summary">${escapeHtml(shortDesc)}</p>
             </div>
         `;
 
@@ -1265,33 +1420,25 @@ document.addEventListener("DOMContentLoaded", () => {
         const item = document.createElement("div");
         item.className = "discover-group-item";
 
-        const initial = (group.name || "G").charAt(0).toUpperCase();
+        const logoHtml = getCommunityLogoHtml(group, "group-item-avatar");
+        const shortDesc = getShortGroupSummary(group);
         const isPrivate = group.privacy === "PRIVATE";
         const hasPending = group.hasPendingRequest;
-        const discoverAvatarHtml = group.avatarUrl
-            ? `<div class="group-item-avatar" style="background-image: url('${escapeHtml(group.avatarUrl)}'); background-size: cover; background-position: center; color: transparent;"></div>`
-            : `<div class="group-item-avatar">${initial}</div>`;
 
         item.innerHTML = `
-            <div class="discover-item-top">
-                ${discoverAvatarHtml}
+            <div class="discover-item-main">
+                ${logoHtml}
                 <div class="discover-item-info">
-                    <h4 class="discover-item-name">${escapeHtml(group.name)}</h4>
-                    <p class="discover-item-desc">${escapeHtml(group.description || "No description provided.")}</p>
+                    <h4 class="discover-item-name" title="${escapeHtml(group.name)}">${escapeHtml(group.name)}</h4>
+                    <p class="discover-item-summary">${escapeHtml(shortDesc)}</p>
                 </div>
-            </div>
-            <div class="discover-item-footer">
-                <div class="discover-item-badges">
-                    <span class="privacy-pill-micro">${isPrivate ? '🔒 Private' : '🌐 Public'}</span>
-                    <span>${group.memberCount} ${group.memberCount === 1 ? 'member' : 'members'}</span>
-                </div>
-                <div class="discover-btn-group">
+                <div class="discover-item-actions">
                     ${isPrivate
                         ? (hasPending
-                            ? `<button class="join-action-btn pending" disabled>Request Pending</button>`
+                            ? `<button class="join-action-btn pending" disabled>Pending</button>`
                             : `
-                                <button class="join-action-btn outline btn-enter-code" data-id="${group.id}">Join with Code</button>
-                                <button class="join-action-btn primary btn-request-join" data-id="${group.id}">Request to Join</button>
+                                <button class="join-action-btn outline btn-enter-code" data-id="${group.id}">Code</button>
+                                <button class="join-action-btn primary btn-request-join" data-id="${group.id}">Request</button>
                               `
                           )
                         : `<button class="join-action-btn primary btn-join-public" data-id="${group.id}">Join</button>`
@@ -1630,14 +1777,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function updateChatHeader(group) {
         const initial = (group.name || "G").charAt(0).toUpperCase();
+        const brandKey = getCommunityBrandKey(group);
         if (chatHeaderAvatar) {
-            if (group.avatarUrl) {
+            if (brandKey && COMMUNITY_BRAND_LOGOS[brandKey]) {
+                chatHeaderAvatar.style.backgroundImage = "none";
+                chatHeaderAvatar.innerHTML = COMMUNITY_BRAND_LOGOS[brandKey];
+            } else if (group.avatarUrl && !group.avatarUrl.includes("images.unsplash.com")) {
                 chatHeaderAvatar.style.backgroundImage = `url('${escapeHtml(group.avatarUrl)}')`;
                 chatHeaderAvatar.style.backgroundSize = "cover";
                 chatHeaderAvatar.style.backgroundPosition = "center";
                 chatHeaderAvatar.textContent = "";
             } else {
-                chatHeaderAvatar.style.backgroundImage = "";
+                chatHeaderAvatar.style.backgroundImage = "none";
                 chatHeaderAvatar.textContent = initial;
             }
         }
@@ -1692,8 +1843,12 @@ document.addEventListener("DOMContentLoaded", () => {
     // ============================================================
     function updateDrawerDetails(group) {
         const initial = (group.name || "G").charAt(0).toUpperCase();
+        const brandKey = getCommunityBrandKey(group);
         if (drawerGroupAvatar) {
-            if (group.avatarUrl) {
+            if (brandKey && COMMUNITY_BRAND_LOGOS[brandKey]) {
+                drawerGroupAvatar.style.backgroundImage = "none";
+                drawerGroupAvatar.innerHTML = COMMUNITY_BRAND_LOGOS[brandKey];
+            } else if (group.avatarUrl && !group.avatarUrl.includes("images.unsplash.com")) {
                 drawerGroupAvatar.style.backgroundImage = `url('${escapeHtml(group.avatarUrl)}')`;
                 drawerGroupAvatar.style.backgroundSize = "cover";
                 drawerGroupAvatar.style.backgroundPosition = "center";
@@ -1948,6 +2103,101 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    // ============================================================
+    // CHAT INTERACTIONS: REPLIES, REACTIONS, AVATARS
+    // ============================================================
+    let activeReplyTarget = null;
+    const messageReactionsMap = new Map();
+
+    function getAvatarGradient(name) {
+        const colors = [
+            "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)",
+            "linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)",
+            "linear-gradient(135deg, #ec4899 0%, #be185d 100%)",
+            "linear-gradient(135deg, #10b981 0%, #047857 100%)",
+            "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
+            "linear-gradient(135deg, #06b6d4 0%, #0e7490 100%)",
+            "linear-gradient(135deg, #f97316 0%, #c2410c 100%)"
+        ];
+        let hash = 0;
+        for (let i = 0; i < (name || "").length; i++) {
+            hash = name.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        return colors[Math.abs(hash) % colors.length];
+    }
+
+    function setReplyTarget(msg) {
+        activeReplyTarget = {
+            id: msg.id || msg.messageId,
+            username: msg.senderUsername || 'Member',
+            snippet: (msg.content || (msg.mediaUrl ? '[Image]' : '')).substring(0, 50)
+        };
+        const bar = document.getElementById("chatReplyPreviewBar");
+        const userEl = document.getElementById("replyPreviewUsername");
+        const textEl = document.getElementById("replyPreviewText");
+        if (bar && userEl && textEl) {
+            userEl.textContent = `@${activeReplyTarget.username}`;
+            textEl.textContent = activeReplyTarget.snippet;
+            bar.style.display = "flex";
+        }
+        if (messageInput) {
+            messageInput.focus();
+        }
+    }
+
+    function clearReplyTarget() {
+        activeReplyTarget = null;
+        const bar = document.getElementById("chatReplyPreviewBar");
+        if (bar) bar.style.display = "none";
+    }
+
+    function addMessageReaction(messageId, emoji, username) {
+        if (!messageReactionsMap.has(messageId)) {
+            messageReactionsMap.set(messageId, {});
+        }
+        const reactions = messageReactionsMap.get(messageId);
+        if (!reactions[emoji]) {
+            reactions[emoji] = { count: 0, users: new Set() };
+        }
+        if (reactions[emoji].users.has(username)) {
+            reactions[emoji].users.delete(username);
+            reactions[emoji].count = Math.max(0, reactions[emoji].count - 1);
+            if (reactions[emoji].count === 0) {
+                delete reactions[emoji];
+            }
+        } else {
+            reactions[emoji].users.add(username);
+            reactions[emoji].count++;
+        }
+        renderMessageReactions(messageId);
+    }
+
+    function renderMessageReactions(messageId) {
+        const row = document.querySelector(`[data-message-id="${messageId}"]`);
+        if (!row) return;
+        const container = row.querySelector(".message-reactions");
+        if (!container) return;
+        const reactions = messageReactionsMap.get(messageId) || {};
+        const emojis = Object.keys(reactions);
+        if (emojis.length === 0) {
+            container.innerHTML = "";
+            return;
+        }
+        container.innerHTML = emojis.map(emoji => {
+            const item = reactions[emoji];
+            const userReacted = item.users.has(currentUser.username);
+            return `<button type="button" class="reaction-pill ${userReacted ? 'user-reacted' : ''}" data-msg-id="${messageId}" data-emoji="${emoji}">
+                <span>${emoji}</span> <span>${item.count}</span>
+            </button>`;
+        }).join("");
+        container.querySelectorAll(".reaction-pill").forEach(pill => {
+            pill.addEventListener("click", (e) => {
+                e.stopPropagation();
+                addMessageReaction(messageId, pill.getAttribute("data-emoji"), currentUser.username);
+            });
+        });
+    }
+
     function appendMessage(msg, isNewMsg = true) {
         const placeholder = messagesList.querySelector(".list-placeholder-state");
         if (placeholder) placeholder.remove();
@@ -1975,8 +2225,10 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
 
+        const msgId = msg.id || msg.messageId || ("msg-" + Date.now() + "-" + Math.random().toString(36).substr(2, 6));
         const row = document.createElement("div");
         row.className = `message-row ${mine ? 'mine' : 'other'} ${isGrouped ? 'grouped' : 'group-first'}`;
+        row.setAttribute("data-message-id", msgId);
 
         let mediaHtml = "";
         if (msg.mediaUrl) {
@@ -1987,18 +2239,87 @@ document.addEventListener("DOMContentLoaded", () => {
             `;
         }
 
+        // Quoted Reply logic
+        let displayContent = msg.content || "";
+        let replyQuoteHtml = "";
+        const replyMatch = displayContent.match(/^\[Replying to @([^:]+):\s*"([^"]+)"\]\n?([\s\S]*)$/);
+        if (replyMatch) {
+            replyQuoteHtml = `
+                <div class="message-reply-quote">
+                    <span class="reply-quote-sender">↩ Replying to @${escapeHtml(replyMatch[1])}</span>
+                    <span class="reply-quote-text">${escapeHtml(replyMatch[2])}</span>
+                </div>
+            `;
+            displayContent = replyMatch[3].trim();
+        }
+
+        // Avatar for other user
+        const senderInitial = (msg.senderUsername || 'U').charAt(0).toUpperCase();
+        const avatarHtml = !mine
+            ? (!isGrouped
+                ? `<div class="msg-avatar" style="background: ${getAvatarGradient(msg.senderUsername || 'U')}">${senderInitial}</div>`
+                : `<div class="msg-avatar-spacer"></div>`)
+            : '';
+
         row.innerHTML = `
-            ${!mine && !isGrouped ? `<div class="msg-avatar-spacer"></div>` : (isGrouped && !mine ? `<div class="msg-avatar-spacer"></div>` : '')}
+            ${avatarHtml}
             <div class="message-bubble">
                 ${!mine && !isGrouped ? `<span class="message-sender">${escapeHtml(msg.senderUsername || 'Member')}</span>` : ''}
+                ${replyQuoteHtml}
                 ${mediaHtml}
-                ${msg.content ? `<div class="message-text">${escapeHtml(msg.content)}</div>` : ''}
+                ${displayContent ? `<div class="message-text">${escapeHtml(displayContent)}</div>` : ''}
                 <div class="message-meta">
                     <span class="message-time">${timeStr}</span>
-                    ${mine ? '<span class="message-check">✓</span>' : ''}
+                    ${mine ? '<span class="message-check">✓✓</span>' : ''}
                 </div>
+                <div class="message-reactions"></div>
+            </div>
+            <div class="msg-hover-actions">
+                <button type="button" class="hover-action-btn btn-react" data-emoji="👍" title="Thumbs Up">👍</button>
+                <button type="button" class="hover-action-btn btn-react" data-emoji="❤️" title="Heart">❤️</button>
+                <button type="button" class="hover-action-btn btn-react" data-emoji="🔥" title="Fire">🔥</button>
+                <button type="button" class="hover-action-btn btn-reply" title="Reply">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9 17 4 12 9 7"></polyline>
+                        <path d="M20 18v-2a4 4 0 0 0-4-4H4"></path>
+                    </svg>
+                </button>
+                <button type="button" class="hover-action-btn btn-copy" title="Copy text">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                </button>
             </div>
         `;
+
+        row.querySelectorAll(".btn-react").forEach(btn => {
+            btn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                addMessageReaction(msgId, btn.getAttribute("data-emoji"), currentUser.username);
+            });
+        });
+
+        const replyBtn = row.querySelector(".btn-reply");
+        if (replyBtn) {
+            replyBtn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                setReplyTarget(msg);
+            });
+        }
+
+        const copyBtn = row.querySelector(".btn-copy");
+        if (copyBtn) {
+            copyBtn.addEventListener("click", async (e) => {
+                e.stopPropagation();
+                try {
+                    await navigator.clipboard.writeText(displayContent || msg.mediaUrl || "");
+                    showToast("Message copied to clipboard", "info");
+                } catch (err) {
+                    showToast("Could not copy message", "error");
+                }
+            });
+        }
 
         const imgEl = row.querySelector(".chat-attached-image");
         if (imgEl) {
@@ -2244,6 +2565,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
 
+            // Handle reply quoting if active
+            let contentToSend = content;
+            if (activeReplyTarget) {
+                contentToSend = `[Replying to @${activeReplyTarget.username}: "${activeReplyTarget.snippet}"]\n${content}`;
+                clearReplyTarget();
+            }
+
             // Zero-latency optimistic append in sender's UI
             const tempId = "client-" + Date.now() + "-" + Math.random().toString(36).substr(2, 6);
             displayedMessageIds.add(tempId);
@@ -2254,7 +2582,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 groupId: currentGroup.id,
                 senderId: currentUser.id,
                 senderUsername: currentUser.username,
-                content: content,
+                content: contentToSend,
                 timestamp: new Date().toISOString(),
                 status: "SENT",
                 mediaUrl: uploadedMediaUrl,
@@ -2267,7 +2595,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 socket.send(JSON.stringify({
                     type: "SEND_MESSAGE",
                     groupId: currentGroup.id,
-                    content: content,
+                    content: contentToSend,
                     mediaUrl: uploadedMediaUrl,
                     messageType: uploadedMediaUrl ? "IMAGE" : "TEXT"
                 }));
@@ -2278,7 +2606,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         socket.send(JSON.stringify({
                             type: "SEND_MESSAGE",
                             groupId: currentGroup.id,
-                            content: content,
+                            content: contentToSend,
                             mediaUrl: uploadedMediaUrl,
                             messageType: uploadedMediaUrl ? "IMAGE" : "TEXT"
                         }));
@@ -2299,6 +2627,54 @@ document.addEventListener("DOMContentLoaded", () => {
             showToast("Error sending message. Please check connection.", "error");
         } finally {
             sendMessageBtn.disabled = false;
+        }
+    });
+
+    // Wire Emoji Picker & Reply Cancel
+    const chatEmojiBtn = document.getElementById("chatEmojiBtn");
+    const chatEmojiPicker = document.getElementById("chatEmojiPicker");
+    const closeEmojiPickerBtn = document.getElementById("closeEmojiPickerBtn");
+    const cancelChatReplyBtn = document.getElementById("cancelChatReplyBtn");
+
+    if (cancelChatReplyBtn) {
+        cancelChatReplyBtn.addEventListener("click", clearReplyTarget);
+    }
+
+    if (chatEmojiBtn && chatEmojiPicker) {
+        chatEmojiBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const isOpen = chatEmojiPicker.style.display !== "none";
+            chatEmojiPicker.style.display = isOpen ? "none" : "block";
+        });
+    }
+
+    if (closeEmojiPickerBtn && chatEmojiPicker) {
+        closeEmojiPickerBtn.addEventListener("click", () => {
+            chatEmojiPicker.style.display = "none";
+        });
+    }
+
+    if (chatEmojiPicker) {
+        chatEmojiPicker.querySelectorAll(".emoji-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const emoji = btn.getAttribute("data-emoji");
+                if (emoji && messageInput) {
+                    const start = messageInput.selectionStart || messageInput.value.length;
+                    const end = messageInput.selectionEnd || messageInput.value.length;
+                    const text = messageInput.value;
+                    messageInput.value = text.substring(0, start) + emoji + text.substring(end);
+                    messageInput.selectionStart = messageInput.selectionEnd = start + emoji.length;
+                    messageInput.focus();
+                }
+            });
+        });
+    }
+
+    document.addEventListener("click", (e) => {
+        if (chatEmojiPicker && chatEmojiPicker.style.display !== "none") {
+            if (!chatEmojiPicker.contains(e.target) && e.target !== chatEmojiBtn && (!chatEmojiBtn || !chatEmojiBtn.contains(e.target))) {
+                chatEmojiPicker.style.display = "none";
+            }
         }
     });
 
