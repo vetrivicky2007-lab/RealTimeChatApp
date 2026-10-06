@@ -50,6 +50,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/ws/**").permitAll()
                         .requestMatchers("/health").permitAll()
+                        .requestMatchers("/api/seed", "/api/seed/**").permitAll()
                         .requestMatchers("/", "/login", "/login.html", "/index.html", "/*.html", "/*.js", "/*.css", "/error", "/favicon.ico").permitAll()
                         .requestMatchers("/static/**").permitAll()
                         .anyRequest().authenticated()

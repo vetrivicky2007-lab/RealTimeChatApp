@@ -1234,9 +1234,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const initial = (group.name || "G").charAt(0).toUpperCase();
         const isPrivate = group.privacy === "PRIVATE";
         const isAdmin = group.admin;
+        const avatarHtml = group.avatarUrl
+            ? `<div class="group-item-avatar" style="background-image: url('${escapeHtml(group.avatarUrl)}'); background-size: cover; background-position: center; color: transparent;"></div>`
+            : `<div class="group-item-avatar">${initial}</div>`;
 
         item.innerHTML = `
-            <div class="group-item-avatar">${initial}</div>
+            ${avatarHtml}
             <div class="group-item-content">
                 <div class="group-item-header">
                     <span class="group-item-title">${escapeHtml(group.name)}</span>
@@ -1265,10 +1268,13 @@ document.addEventListener("DOMContentLoaded", () => {
         const initial = (group.name || "G").charAt(0).toUpperCase();
         const isPrivate = group.privacy === "PRIVATE";
         const hasPending = group.hasPendingRequest;
+        const discoverAvatarHtml = group.avatarUrl
+            ? `<div class="group-item-avatar" style="background-image: url('${escapeHtml(group.avatarUrl)}'); background-size: cover; background-position: center; color: transparent;"></div>`
+            : `<div class="group-item-avatar">${initial}</div>`;
 
         item.innerHTML = `
             <div class="discover-item-top">
-                <div class="group-item-avatar">${initial}</div>
+                ${discoverAvatarHtml}
                 <div class="discover-item-info">
                     <h4 class="discover-item-name">${escapeHtml(group.name)}</h4>
                     <p class="discover-item-desc">${escapeHtml(group.description || "No description provided.")}</p>
@@ -1624,7 +1630,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function updateChatHeader(group) {
         const initial = (group.name || "G").charAt(0).toUpperCase();
-        if (chatHeaderAvatar) chatHeaderAvatar.textContent = initial;
+        if (chatHeaderAvatar) {
+            if (group.avatarUrl) {
+                chatHeaderAvatar.style.backgroundImage = `url('${escapeHtml(group.avatarUrl)}')`;
+                chatHeaderAvatar.style.backgroundSize = "cover";
+                chatHeaderAvatar.style.backgroundPosition = "center";
+                chatHeaderAvatar.textContent = "";
+            } else {
+                chatHeaderAvatar.style.backgroundImage = "";
+                chatHeaderAvatar.textContent = initial;
+            }
+        }
         if (chatGroupName) chatGroupName.textContent = group.name;
         if (chatGroupMembersCount) chatGroupMembersCount.textContent = `${group.memberCount} ${group.memberCount === 1 ? 'member' : 'members'}`;
 
@@ -1676,7 +1692,17 @@ document.addEventListener("DOMContentLoaded", () => {
     // ============================================================
     function updateDrawerDetails(group) {
         const initial = (group.name || "G").charAt(0).toUpperCase();
-        drawerGroupAvatar.textContent = initial;
+        if (drawerGroupAvatar) {
+            if (group.avatarUrl) {
+                drawerGroupAvatar.style.backgroundImage = `url('${escapeHtml(group.avatarUrl)}')`;
+                drawerGroupAvatar.style.backgroundSize = "cover";
+                drawerGroupAvatar.style.backgroundPosition = "center";
+                drawerGroupAvatar.textContent = "";
+            } else {
+                drawerGroupAvatar.style.backgroundImage = "";
+                drawerGroupAvatar.textContent = initial;
+            }
+        }
         drawerGroupName.textContent = group.name;
         drawerGroupDesc.textContent = group.description || "No description provided.";
         const isPrivate = group.privacy === "PRIVATE";

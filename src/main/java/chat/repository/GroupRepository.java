@@ -16,6 +16,8 @@ public interface GroupRepository extends MongoRepository<Group, String> {
 
     boolean existsByNameIgnoreCase(String name);
 
+    Optional<Group> findByNameIgnoreCase(String name);
+
     Optional<Group> findByInviteCode(String inviteCode);
 
     boolean existsByInviteCode(String inviteCode);
